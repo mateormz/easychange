@@ -66,16 +66,16 @@ resources:
         PointInTimeRecoverySpecification:
           PointInTimeRecoveryEnabled: true
 
-  TokensTable:
-    Type: AWS::DynamoDB::Table
-    Properties:
-      TableName: ${self:provider.environment.TABLE_TOKENS}
-      AttributeDefinitions:
-        - AttributeName: token
-          AttributeType: S
-      KeySchema:
-        - AttributeName: token
-          KeyType: HASH
-      BillingMode: PAY_PER_REQUEST
-      PointInTimeRecoverySpecification:
-        PointInTimeRecoveryEnabled: true
+    TokensTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:provider.environment.TABLE_TOKENS}
+        AttributeDefinitions:
+          - AttributeName: token
+            AttributeType: S
+        KeySchema:
+          - AttributeName: token
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+        PointInTimeRecoverySpecification:
+          PointInTimeRecoveryEnabled: true
