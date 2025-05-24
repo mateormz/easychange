@@ -65,8 +65,8 @@ functions:
           method: delete
           cors: true
 
-  logoutUser:
-    handler: logoutUser.lambda_handler
+  logout:
+    handler: logout.lambda_handler
     events:
       - http:
           path: auth/logout
