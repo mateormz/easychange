@@ -99,7 +99,6 @@ def lambda_handler(event, context):
             }
 
         user_id = user['user_id']
-        role = user.get('role', 'distributor')
 
         # Generate token
         token = str(uuid.uuid4())
@@ -114,8 +113,7 @@ def lambda_handler(event, context):
             Item={
                 'token': token,
                 'expiration': expiration,
-                'user_id': user_id,
-                'role': role
+                'user_id': user_id
             }
         )
 
@@ -126,8 +124,7 @@ def lambda_handler(event, context):
             'body': json.dumps({
                 'token': token,
                 'expires': expiration,
-                'user_id': user_id,
-                'role': role
+                'user_id': user_id
             })
         }
 
