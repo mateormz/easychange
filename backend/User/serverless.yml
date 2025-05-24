@@ -45,8 +45,16 @@ functions:
     handler: getUserById.lambda_handler
     events:
       - http:
-          path: auth/users/{user_id}
+          path: auth/users/get/{user_id}
           method: get
+          cors: true
+
+  updateUser:
+    handler: updateUser.lambda_handler
+    events:
+      - http:
+          path: auth/users/update/{user_id}
+          method: put
           cors: true
 
   validateToken:
