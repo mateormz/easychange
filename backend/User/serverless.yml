@@ -57,6 +57,14 @@ functions:
           method: put
           cors: true
 
+  deleteUser:
+    handler: deleteUser.lambda_handler
+    events:
+      - http:
+          path: auth/users/delete/{user_id}
+          method: delete
+          cors: true
+
   validateToken:
     handler: validateToken.lambda_handler
     events:
