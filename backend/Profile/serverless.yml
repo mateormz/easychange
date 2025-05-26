@@ -10,6 +10,7 @@ provider:
   timeout: 29
   environment:
     TABLE_BANKACC: ${sls:stage}-profile-bank-accounts-table
+    TABLE_ALERTS: ${sls:stage}-profile-alerts-table  # ← ESTA LÍNEA
     STAGE: ${sls:stage}
     VALIDATE_TOKEN_FUNCTION: disdb-auth-api
 
