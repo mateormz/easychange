@@ -77,7 +77,7 @@ def fetch_rate_for_pair(source, target):
     key = source + target
     if key not in quotes:
         raise Exception(f"Rate not found for {source}->{target}")
-    return quotes[key], data['timestamp']
+    return str(quotes[key]), data['timestamp']  # guardamos como string
 
 
 def save_rates_to_db(quotes, timestamp):
@@ -104,7 +104,7 @@ def save_rates_to_db(quotes, timestamp):
             batch.put_item(Item={
                 'from': from_currency,
                 'to': to_currency,
-                'rate': rate,
+                'rate': str(rate),  # guardamos como string
                 'fetched_at': now,
                 'expiration': timestamp,
                 'ttl': ttl
@@ -141,7 +141,7 @@ def save_rate_to_db(from_currency, to_currency, rate, timestamp):
     table.put_item(Item={
         'from': from_currency,
         'to': to_currency,
-        'rate': rate,
+        'rate': str(rate),  # guardamos como string
         'fetched_at': now,
         'expiration': timestamp,
         'ttl': ttl
