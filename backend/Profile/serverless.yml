@@ -1,0 +1,85 @@
+org: ${env:SLS_ORG}
+service: easychange-profile-api
+
+provider:
+  name: aws
+  runtime: python3.12
+  iam:
+    role: ${env:AWS_ROLE_ARN}
+  memorySize: 1024
+  timeout: 29
+  environment:
+    TABLE_BANKACC: ${sls:stage}-profile-bank-accounts-table
+    STAGE: ${sls:stage}
+    VALIDATE_TOKEN_FUNCTION: disdb-auth-api
+
+functions:
+  crearCuenta:
+    handler: createBankAccount.lambda_handler
+    events:
+      - http:
+          path: profile/bankacc
+          method: post
+          cors: true
+
+  listarCuentas:
+    handler: listBankAccounts.lambda_handler
+    events:
+      - http:
+          path: profile/bankacc
+          method: get
+          cors: true
+
+  actualizarCuenta:
+    handler: updateBankAccount.lambda_handler
+    events:
+      - http:
+          path: profile/bankacc/{cuenta_id}
+          method: put
+          cors: true
+
+  eliminarCuenta:
+    handler: deleteBankAccount.lambda_handler
+    events:
+      - http:
+          path: profile/bankacc/{cuenta_id}
+          method: delete
+          cors: true
+  cuentasPorMoneda:
+    handler: getAccountsByMoneda.lambda_handler
+    events:
+      - http:
+          path: profile/bankacc/moneda/{moneda}
+          method: get
+          cors: true
+
+
+resources:
+  Resources:
+    BankAccountsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:provider.environment.TABLE_BANKACC}
+        AttributeDefinitions:
+          - AttributeName: usuario_id
+            AttributeType: S
+          - AttributeName: cuenta_id
+            AttributeType: S
+          - AttributeName: moneda
+            AttributeType: S
+        KeySchema:
+          - AttributeName: usuario_id
+            KeyType: HASH
+          - AttributeName: cuenta_id
+            KeyType: RANGE
+        GlobalSecondaryIndexes:
+          - IndexName: moneda-index
+            KeySchema:
+              - AttributeName: moneda
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
+        BillingMode: PAY_PER_REQUEST
+        PointInTimeRecoverySpecification:
+          PointInTimeRecoveryEnabled: true
+
