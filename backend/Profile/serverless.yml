@@ -53,6 +53,38 @@ functions:
           method: get
           cors: true
 
+  crearAlerta:
+    handler: createAlert.lambda_handler
+    events:
+      - http:
+          path: profile/alerts
+          method: post
+          cors: true
+
+  listarAlertas:
+    handler: listAlerts.lambda_handler
+    events:
+      - http:
+          path: profile/alerts
+          method: get
+          cors: true
+
+  actualizarAlerta:
+    handler: updateAlert.lambda_handler
+    events:
+      - http:
+          path: profile/alerts/{alerta_id}
+          method: put
+          cors: true
+
+  eliminarAlerta:
+    handler: deleteAlert.lambda_handler
+    events:
+      - http:
+          path: profile/alerts/{alerta_id}
+          method: delete
+          cors: true
+
 
 resources:
   Resources:
@@ -76,6 +108,33 @@ resources:
           - IndexName: moneda-index
             KeySchema:
               - AttributeName: moneda
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
+        BillingMode: PAY_PER_REQUEST
+        PointInTimeRecoverySpecification:
+          PointInTimeRecoveryEnabled: true
+
+    AlertsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${sls:stage}-profile-alerts-table
+        AttributeDefinitions:
+          - AttributeName: usuario_id
+            AttributeType: S
+          - AttributeName: alerta_id
+            AttributeType: S
+          - AttributeName: tipo_cambio
+            AttributeType: S
+        KeySchema:
+          - AttributeName: usuario_id
+            KeyType: HASH
+          - AttributeName: alerta_id
+            KeyType: RANGE
+        GlobalSecondaryIndexes:
+          - IndexName: tipo-cambio-index
+            KeySchema:
+              - AttributeName: tipo_cambio
                 KeyType: HASH
             Projection:
               ProjectionType: ALL
