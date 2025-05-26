@@ -6,6 +6,9 @@ provider:
   runtime: python3.9
   iam:
     role: ${env:AWS_ROLE_ARN}
+    # Asegura permisos para invocar la función validateToken de disdb-auth-api
+    managedPolicyArns:
+      - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
   memorySize: 1024
   timeout: 29
   environment:
@@ -13,7 +16,7 @@ provider:
     EXTERNAL_API_URL: https://api.exchangerate.host
     EXCHANGE_API_ACCESS_KEY: 76709fdb221e1c208d62ca57e2700050
     CACHE_TTL_SECONDS: 3600
-    SERVICE_NAME: exchange-rate-api
+    SERVICE_NAME: disdb-auth-api      # Cambiado para invocar la función validateToken en disdb-auth-api
     STAGE: ${sls:stage}
     VALIDATE_TOKEN_FUNCTION: validateToken
 
