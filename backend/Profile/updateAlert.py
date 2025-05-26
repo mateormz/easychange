@@ -1,6 +1,7 @@
 import boto3
 import os
 import json
+from decimal import Decimal
 from common import validate_token_and_get_user
 
 dynamodb = boto3.resource('dynamodb')
@@ -17,6 +18,11 @@ def lambda_handler(event, context):
                 'statusCode': 400,
                 'body': json.dumps({'error': 'Request body is missing'})
             }
+
+        # Convertir umbral a Decimal si está presente
+        for k in body:
+            if k == 'umbral':
+                body[k] = Decimal(str(body[k]))
 
         update_expression = "SET " + ", ".join(f"#{k} = :{k}" for k in body)
         expression_attribute_names = {f"#{k}": k for k in body}

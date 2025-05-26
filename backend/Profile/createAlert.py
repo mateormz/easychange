@@ -2,6 +2,7 @@ import boto3
 import os
 import json
 import uuid
+from decimal import Decimal
 from common import validate_token_and_get_user
 
 dynamodb = boto3.resource('dynamodb')
@@ -21,7 +22,7 @@ def lambda_handler(event, context):
             "usuario_id": user_id,
             "alerta_id": alerta_id,
             "tipo_cambio": tipo_cambio,
-            "umbral": umbral,
+	    "umbral": Decimal(str(umbral)),
             "direccion": direccion
         }
 
