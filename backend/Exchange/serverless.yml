@@ -1,0 +1,91 @@
+org: ${env:SLS_ORG}
+service: exchange-rate-api
+
+provider:
+  name: aws
+  runtime: python3.9
+  iam:
+    role: ${env:AWS_ROLE_ARN}
+    managedPolicyArns:
+      - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+  memorySize: 1024
+  timeout: 29
+  environment:
+    RATES_TABLE: ${sls:stage}-exchange-rates
+    EXTERNAL_API_URL: https://api.exchangerate.host
+    EXCHANGE_API_ACCESS_KEY: 76709fdb221e1c208d62ca57e2700050
+    CACHE_TTL_SECONDS: 3600
+    SERVICE_NAME: disdb-auth-api      
+    STAGE: ${sls:stage}
+    VALIDATE_TOKEN_FUNCTION: validateToken
+
+plugins:
+  - serverless-python-requirements
+
+custom:
+  pythonRequirements:
+    dockerizePip: true
+
+functions:
+  createExchangeRates:
+    handler: createExchangeRates.lambda_handler
+    events:
+      - http:
+          path: exchange-rate/create
+          method: post
+          cors: true
+
+  consultConversion:
+    handler: consultConversion.lambda_handler
+    events:
+      - http:
+          path: exchange-rate/{from}/{to}
+          method: get
+          cors: true
+
+  updateSingleRate:
+    handler: updateSingleRate.lambda_handler
+    events:
+      - http:
+          path: exchange-rate/{from}/{to}
+          method: put
+          cors: true
+
+  updateExchangeRates:
+    handler: updateExchangeRates.lambda_handler
+    events:
+      - http:
+          path: exchange-rate/update
+          method: post
+          cors: true
+
+  deleteExchangeRate:
+    handler: deleteExchangeRate.lambda_handler
+    events:
+      - http:
+          path: exchange-rate/{from}/{to}
+          method: delete
+          cors: true
+
+resources:
+  Resources:
+    ExchangeRatesTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:provider.environment.RATES_TABLE}
+        AttributeDefinitions:
+          - AttributeName: from
+            AttributeType: S
+          - AttributeName: to
+            AttributeType: S
+        KeySchema:
+          - AttributeName: from
+            KeyType: HASH
+          - AttributeName: to
+            KeyType: RANGE
+        BillingMode: PAY_PER_REQUEST
+        PointInTimeRecoverySpecification:
+          PointInTimeRecoveryEnabled: true
+        TimeToLiveSpecification:
+          AttributeName: ttl
+          Enabled: true
