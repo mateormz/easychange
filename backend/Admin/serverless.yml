@@ -1,0 +1,64 @@
+service: admin-microservice
+
+provider:
+  name: aws
+  runtime: python3.12
+  memorySize: 1024
+  timeout: 29
+  environment:
+    CONFIG_TABLE: admin-configurations
+    VALIDATE_TOKEN_FUNCTION: admin-microservice
+    STAGE: ${sls:stage}
+
+functions:
+  configureConversionHours:
+    handler: configureConversionHours.lambda_handler
+    events:
+      - http:
+          path: admin/config/conversion-hours
+          method: put
+          cors: true
+
+  setGlobalTransactionLimits:
+    handler: setGlobalTransactionLimits.lambda_handler
+    events:
+      - http:
+          path: admin/config/transaction-limits
+          method: put
+          cors: true
+
+  watchSystemLogs:
+    handler: watchSystemLogs.lambda_handler
+    events:
+      - http:
+          path: admin/logs/system
+          method: get
+          cors: true
+
+  validateToken:
+    handler: validateToken.lambda_handler
+    events:
+      - http:
+          path: token/validate
+          method: post
+          cors: true
+
+resources:
+  Resources:
+    AdminConfigurationsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: admin-configurations
+        AttributeDefinitions:
+          - AttributeName: tenant_id
+            AttributeType: S
+          - AttributeName: config_id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: tenant_id
+            KeyType: HASH
+          - AttributeName: config_id
+            KeyType: RANGE
+        BillingMode: PAY_PER_REQUEST
+        PointInTimeRecoverySpecification:
+          PointInTimeRecoveryEnabled: true
