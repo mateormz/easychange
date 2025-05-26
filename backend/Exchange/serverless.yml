@@ -17,6 +17,13 @@ provider:
     STAGE: ${sls:stage}
     VALIDATE_TOKEN_FUNCTION: validateToken
 
+plugins:
+  - serverless-python-requirements
+
+custom:
+  pythonRequirements:
+    dockerizePip: true
+
 functions:
   createExchangeRates:
     handler: createExchangeRates.lambda_handler
