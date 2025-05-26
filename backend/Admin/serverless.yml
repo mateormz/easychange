@@ -6,9 +6,10 @@ provider:
   memorySize: 1024
   timeout: 29
   iam:
-    role: arn:aws:iam::703649452276:role/LabRole
+    role: arn:aws:iam::039490588022:role/LabRole
   environment:
     CONFIG_TABLE: admin-configurations
+    LOGS_TABLE: admin-logs
     VALIDATE_TOKEN_FUNCTION: admin-microservice
     STAGE: ${sls:stage}
 
@@ -64,3 +65,23 @@ resources:
         BillingMode: PAY_PER_REQUEST
         PointInTimeRecoverySpecification:
           PointInTimeRecoveryEnabled: true
+
+    AdminLogsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: admin-logs
+        AttributeDefinitions:
+          - AttributeName: tenant_id
+            AttributeType: S
+          - AttributeName: timestamp
+            AttributeType: S
+        KeySchema:
+          - AttributeName: tenant_id
+            KeyType: HASH
+          - AttributeName: timestamp
+            KeyType: RANGE
+        BillingMode: PAY_PER_REQUEST
+        PointInTimeRecoverySpecification:
+          PointInTimeRecoveryEnabled: true
+
+

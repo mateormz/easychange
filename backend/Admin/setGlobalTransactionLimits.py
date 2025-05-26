@@ -1,9 +1,11 @@
 import boto3
 import os
 import json
+from datetime import datetime
 
 dynamodb = boto3.resource('dynamodb')
-table = dynamodb.Table(os.environ["CONFIG_TABLE"])
+config_table = dynamodb.Table(os.environ["CONFIG_TABLE"])
+logs_table = dynamodb.Table(os.environ["LOGS_TABLE"])
 
 def lambda_handler(event, context):
     try:
@@ -17,10 +19,17 @@ def lambda_handler(event, context):
                 'body': json.dumps({'message': 'tenant_id y transaction_limit son requeridos'})
             }
 
-        table.put_item(Item={
+        config_table.put_item(Item={
             'tenant_id': tenant_id,
             'config_id': 'transaction-limit',
             'value': transaction_limit
+        })
+
+        # Insertar log con fecha y mensaje
+        logs_table.put_item(Item={
+            'tenant_id': tenant_id,
+            'timestamp': datetime.utcnow().isoformat(),
+            'message': f'Límite de transacción configurado a: {transaction_limit}'
         })
 
         return {

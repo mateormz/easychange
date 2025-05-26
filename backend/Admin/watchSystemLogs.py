@@ -1,13 +1,24 @@
+import boto3
+import os
 import json
+from boto3.dynamodb.conditions import Key
+
+dynamodb = boto3.resource('dynamodb')
+logs_table = dynamodb.Table(os.environ["LOGS_TABLE"])
 
 def lambda_handler(event, context):
     try:
-        logs = [
-            "2025-05-25 12:00:00 - Sistema iniciado",
-            "2025-05-25 12:05:23 - Configuración de franjas horarias actualizada",
-            "2025-05-25 12:10:45 - Límites de transacción establecidos",
-            "2025-05-25 12:15:00 - Usuario admin autenticado"
-        ]
+        # Obtener tenant_id de query string o usar default
+        tenant_id = event.get('queryStringParameters', {}).get('tenant_id', 'default')
+
+        # Consultar logs ordenados por timestamp descendente
+        response = logs_table.query(
+            KeyConditionExpression=Key('tenant_id').eq(tenant_id),
+            ScanIndexForward=False,
+            Limit=50
+        )
+
+        logs = [{'timestamp': item['timestamp'], 'message': item['message']} for item in response.get('Items', [])]
 
         return {
             'statusCode': 200,
@@ -18,4 +29,3 @@ def lambda_handler(event, context):
             'statusCode': 500,
             'body': json.dumps({'error': str(e)})
         }
-    
