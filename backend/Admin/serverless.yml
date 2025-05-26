@@ -5,6 +5,8 @@ provider:
   runtime: python3.12
   memorySize: 1024
   timeout: 29
+  iam:
+    role: arn:aws:iam::703649452276:role/LabRole
   environment:
     CONFIG_TABLE: admin-configurations
     VALIDATE_TOKEN_FUNCTION: admin-microservice
