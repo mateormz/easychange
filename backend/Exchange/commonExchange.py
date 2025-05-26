@@ -2,7 +2,8 @@ import boto3
 import os
 import json
 import time
-import requests
+import urllib.request
+import urllib.parse
 
 # Inicializa recurso DynamoDB y tabla
 dynamodb = boto3.resource('dynamodb')
@@ -12,6 +13,7 @@ table = dynamodb.Table(os.environ['RATES_TABLE'])
 API_URL = os.environ['EXTERNAL_API_URL']
 API_KEY = os.environ['EXCHANGE_API_ACCESS_KEY']
 CACHE_TTL = int(os.environ.get('CACHE_TTL_SECONDS', 3600))
+
 
 def validate_token_and_get_user(event):
     """
@@ -39,6 +41,7 @@ def validate_token_and_get_user(event):
     user_info = json.loads(validation_result.get('body', '{}'))
     return user_info.get('user_id')
 
+
 def fetch_rates_for_source(source):
     """
     Obtiene todas las tasas de cambio desde 'source' usando la API externa.
@@ -48,12 +51,13 @@ def fetch_rates_for_source(source):
         'access_key': API_KEY,
         'source': source
     }
-    resp = requests.get(f"{API_URL}/live", params=params)
-    resp.raise_for_status()
-    data = resp.json()
+    url = f"{API_URL}/live?" + urllib.parse.urlencode(params)
+    with urllib.request.urlopen(url) as response:
+        data = json.loads(response.read().decode())
     if not data.get('success'):
         raise Exception(f"API error: {data}")
     return data['quotes'], data['timestamp']
+
 
 def fetch_rate_for_pair(source, target):
     """
@@ -64,9 +68,9 @@ def fetch_rate_for_pair(source, target):
         'source': source,
         'currencies': target
     }
-    resp = requests.get(f"{API_URL}/live", params=params)
-    resp.raise_for_status()
-    data = resp.json()
+    url = f"{API_URL}/live?" + urllib.parse.urlencode(params)
+    with urllib.request.urlopen(url) as response:
+        data = json.loads(response.read().decode())
     if not data.get('success'):
         raise Exception(f"API error: {data}")
     quotes = data['quotes']
@@ -74,6 +78,7 @@ def fetch_rate_for_pair(source, target):
     if key not in quotes:
         raise Exception(f"Rate not found for {source}->{target}")
     return quotes[key], data['timestamp']
+
 
 def save_rates_to_db(quotes, timestamp):
     """
@@ -105,6 +110,7 @@ def save_rates_to_db(quotes, timestamp):
                 'ttl': ttl
             })
 
+
 def delete_rates_by_source(from_currency):
     """
     Borra todas las tasas que tienen como moneda origen 'from_currency'.
@@ -116,6 +122,7 @@ def delete_rates_by_source(from_currency):
         for item in response.get('Items', []):
             batch.delete_item(Key={'from': item['from'], 'to': item['to']})
 
+
 def get_rate_from_db(from_currency, to_currency):
     """
     Obtiene la tasa almacenada en DynamoDB para el par (from_currency, to_currency).
@@ -123,6 +130,7 @@ def get_rate_from_db(from_currency, to_currency):
     """
     response = table.get_item(Key={'from': from_currency, 'to': to_currency})
     return response.get('Item')
+
 
 def save_rate_to_db(from_currency, to_currency, rate, timestamp):
     """
@@ -138,6 +146,7 @@ def save_rate_to_db(from_currency, to_currency, rate, timestamp):
         'expiration': timestamp,
         'ttl': ttl
     })
+
 
 def delete_rate_from_db(from_currency, to_currency):
     """

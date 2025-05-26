@@ -2,7 +2,6 @@ import boto3
 import os
 import json
 import uuid
-import json
 from commonExchange import validate_token_and_get_user,fetch_rates_for_source,save_rates_to_db
 
 def lambda_handler(event, context):
