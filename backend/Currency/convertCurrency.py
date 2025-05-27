@@ -2,7 +2,7 @@ import boto3
 import os
 import json
 import uuid
-import requests
+import urllib.request
 from common import validate_token_and_get_user
 
 dynamodb = boto3.resource('dynamodb')
@@ -19,10 +19,20 @@ def lambda_handler(event, context):
         to_currency = body['to_currency']
         rate = str(body['rate'])
 
-        # Llamada a API externa para crear tasas de cambio para la moneda 'from'
-        response = requests.post(f"{EXCHANGE_API_BASE}/create", json={"from": from_currency})
-        if response.status_code != 200:
-            raise Exception(f"Error creando tasas en EXCHANGE API: {response.text}")
+        # Llamada a EXCHANGE API usando urllib en vez de requests
+        url = f"{EXCHANGE_API_BASE}/create"
+        payload = json.dumps({"from": from_currency}).encode("utf-8")
+        headers = {"Content-Type": "application/json"}
+
+        req = urllib.request.Request(url, data=payload, headers=headers, method="POST")
+        try:
+            with urllib.request.urlopen(req) as response:
+                if response.status != 200:
+                    raise Exception(f"Error en EXCHANGE API: status {response.status}")
+                response_body = response.read().decode("utf-8")
+                print("EXCHANGE API response:", response_body)
+        except urllib.error.HTTPError as e:
+            raise Exception(f"HTTPError al llamar EXCHANGE API: {e.code} - {e.read().decode('utf-8')}")
 
         conversion_id = str(uuid.uuid4())
 

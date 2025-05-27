@@ -4,7 +4,8 @@ import json
 from boto3.dynamodb.conditions import Key
 from common import validate_token_and_get_user
 from decimal import Decimal
-import requests
+import urllib.request
+import urllib.error
 
 dynamodb = boto3.resource('dynamodb')
 table = dynamodb.Table(os.environ["TABLE_CURRENCY_CONVERSION"])
@@ -27,11 +28,16 @@ def lambda_handler(event, context):
             to_currency = item.get('to_currency')
             if from_currency and to_currency:
                 url = f"{EXCHANGE_API_BASE}/{from_currency}/{to_currency}"
-                res = requests.get(url)
-                if res.status_code == 200:
-                    data = res.json()
-                    # Asumimos que el JSON tiene el rate en 'rate' o similar
-                    item['rate'] = str(data.get('rate', item.get('rate')))
+                try:
+                    req = urllib.request.Request(url, method="GET")
+                    with urllib.request.urlopen(req) as res:
+                        if res.status == 200:
+                            data = json.loads(res.read().decode("utf-8"))
+                            item['rate'] = str(data.get('rate', item.get('rate')))
+                except urllib.error.HTTPError as e:
+                    print(f"Error obteniendo tasa: {e.code} - {e.read().decode('utf-8')}")
+                except Exception as e:
+                    print(f"Error inesperado al obtener tasa: {e}")
 
         return {
             "statusCode": 200,

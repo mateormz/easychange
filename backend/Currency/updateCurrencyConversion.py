@@ -1,8 +1,9 @@
 import boto3
 import os
 import json
+import urllib.request
+import urllib.error
 from common import validate_token_and_get_user
-import requests
 
 dynamodb = boto3.resource('dynamodb')
 table = dynamodb.Table(os.environ["TABLE_CURRENCY_CONVERSION"])
@@ -21,25 +22,34 @@ def lambda_handler(event, context):
                 'body': json.dumps({'error': 'Request body is missing'})
             }
 
-        # Convertir rate a string si existe
         if 'rate' in body:
             body['rate'] = str(body['rate'])
 
-        # Llamada a API externa para actualizar tasa específica
         from_currency = body.get('from_currency')
         to_currency = body.get('to_currency')
 
         if from_currency and to_currency:
             url = f"{EXCHANGE_API_BASE}/{from_currency}/{to_currency}"
-            res = requests.put(url, json=body)
-            if res.status_code != 200:
-                raise Exception(f"Error actualizando tasa en EXCHANGE API: {res.text}")
-        else:
-            # Si solo se actualiza 'from', llamar update-exchangerates
-            if 'from_currency' in body:
-                res = requests.post(f"{EXCHANGE_API_BASE}/update", json={"from": body['from_currency']})
-                if res.status_code != 200:
-                    raise Exception(f"Error actualizando tasas en EXCHANGE API: {res.text}")
+            data = json.dumps(body).encode("utf-8")
+            headers = {"Content-Type": "application/json"}
+            req = urllib.request.Request(url, data=data, headers=headers, method="PUT")
+            try:
+                with urllib.request.urlopen(req) as res:
+                    if res.status != 200:
+                        raise Exception(f"EXCHANGE API error: {res.status}")
+            except urllib.error.HTTPError as e:
+                raise Exception(f"Error actualizando tasa en EXCHANGE API: {e.code} - {e.read().decode('utf-8')}")
+        elif 'from_currency' in body:
+            url = f"{EXCHANGE_API_BASE}/update"
+            data = json.dumps({"from": body['from_currency']}).encode("utf-8")
+            headers = {"Content-Type": "application/json"}
+            req = urllib.request.Request(url, data=data, headers=headers, method="POST")
+            try:
+                with urllib.request.urlopen(req) as res:
+                    if res.status != 200:
+                        raise Exception(f"EXCHANGE API error: {res.status}")
+            except urllib.error.HTTPError as e:
+                raise Exception(f"Error actualizando tasas en EXCHANGE API: {e.code} - {e.read().decode('utf-8')}")
 
         update_expression = "SET " + ", ".join(f"#{k} = :{k}" for k in body)
         expression_attribute_names = {f"#{k}": k for k in body}

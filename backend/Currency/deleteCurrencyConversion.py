@@ -1,8 +1,9 @@
 import boto3
 import os
 import json
+import urllib.request
+import urllib.error
 from common import validate_token_and_get_user
-import requests
 
 dynamodb = boto3.resource('dynamodb')
 table = dynamodb.Table(os.environ["TABLE_CURRENCY_CONVERSION"])
@@ -34,9 +35,14 @@ def lambda_handler(event, context):
         # Llamada a API externa para eliminar tasa
         if from_currency and to_currency:
             url = f"{EXCHANGE_API_BASE}/{from_currency}/{to_currency}"
-            res = requests.delete(url)
-            if res.status_code != 200:
-                raise Exception(f"Error eliminando tasa en EXCHANGE API: {res.text}")
+            req = urllib.request.Request(url, method="DELETE")
+            try:
+                with urllib.request.urlopen(req) as res:
+                    if res.status != 200:
+                        raise Exception(f"Error en EXCHANGE API: status {res.status}")
+                    print("EXCHANGE DELETE response:", res.read().decode("utf-8"))
+            except urllib.error.HTTPError as e:
+                raise Exception(f"Error eliminando tasa en EXCHANGE API: {e.code} - {e.read().decode('utf-8')}")
 
         # Eliminar de Dynamo
         table.delete_item(
