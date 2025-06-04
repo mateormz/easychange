@@ -1,0 +1,151 @@
+org: ${env:SLS_ORG}
+service: easychange-profile-api
+
+provider:
+  name: aws
+  runtime: python3.12
+  iam:
+    role: ${env:AWS_ROLE_ARN}
+  memorySize: 1024
+  timeout: 29
+  environment:
+    TABLE_BANKACC: ${sls:stage}-profile-bank-accounts-table
+    TABLE_ALERTS: ${sls:stage}-profile-alerts-table # ← ESTA LÍNEA
+    STAGE: ${sls:stage}
+    VALIDATE_TOKEN_FUNCTION: disdb-auth-api
+
+functions:
+  crearCuenta:
+    handler: createBankAccount.lambda_handler
+    events:
+      - http:
+          path: profile/bankacc
+          method: post
+          cors: true
+
+  listarCuentas:
+    handler: listBankAccounts.lambda_handler
+    events:
+      - http:
+          path: profile/bankacc/user/{user_id}
+          method: get
+          cors: true
+
+  actualizarCuenta:
+    handler: updateBankAccount.lambda_handler
+    events:
+      - http:
+          path: profile/bankacc/{cuenta_id}
+          method: put
+          cors: true
+
+  eliminarCuenta:
+    handler: deleteBankAccount.lambda_handler
+    events:
+      - http:
+          path: profile/bankacc/{cuenta_id}
+          method: delete
+          cors: true
+  cuentasPorMoneda:
+    handler: getAccountsByMoneda.lambda_handler
+    events:
+      - http:
+          path: profile/bankacc/moneda/{moneda}
+          method: get
+          cors: true
+
+  crearAlerta:
+    handler: createAlert.lambda_handler
+    events:
+      - http:
+          path: profile/alerts
+          method: post
+          cors: true
+
+  listarAlertas:
+    handler: listAlerts.lambda_handler
+    events:
+      - http:
+          path: profile/alerts
+          method: get
+          cors: true
+
+  actualizarAlerta:
+    handler: updateAlert.lambda_handler
+    events:
+      - http:
+          path: profile/alerts/{alerta_id}
+          method: put
+          cors: true
+
+  eliminarAlerta:
+    handler: deleteAlert.lambda_handler
+    events:
+      - http:
+          path: profile/alerts/{alerta_id}
+          method: delete
+          cors: true
+
+  addMoneyToBankAccount:
+    handler: addMoneyToBankAccount.lambda_handler
+    events:
+      - http:
+          path: profile/bankacc/addmoney
+          method: post
+          cors: true
+
+resources:
+  Resources:
+    BankAccountsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:provider.environment.TABLE_BANKACC}
+        AttributeDefinitions:
+          - AttributeName: usuario_id
+            AttributeType: S
+          - AttributeName: cuenta_id
+            AttributeType: S
+          - AttributeName: moneda
+            AttributeType: S
+        KeySchema:
+          - AttributeName: usuario_id
+            KeyType: HASH # Partition key
+          - AttributeName: cuenta_id
+            KeyType: RANGE # Sort key
+        GlobalSecondaryIndexes:
+          - IndexName: moneda-index
+            KeySchema:
+              - AttributeName: moneda
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
+        BillingMode: PAY_PER_REQUEST
+        PointInTimeRecoverySpecification:
+          PointInTimeRecoveryEnabled: true
+
+    AlertsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${sls:stage}-profile-alerts-table
+        AttributeDefinitions:
+          - AttributeName: usuario_id
+            AttributeType: S
+          - AttributeName: alerta_id
+            AttributeType: S
+          - AttributeName: tipo_cambio
+            AttributeType: S
+        KeySchema:
+          - AttributeName: usuario_id
+            KeyType: HASH
+          - AttributeName: alerta_id
+            KeyType: RANGE
+        GlobalSecondaryIndexes:
+          - IndexName: tipo-cambio-index
+            KeySchema:
+              - AttributeName: tipo_cambio
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
+        BillingMode: PAY_PER_REQUEST
+        PointInTimeRecoverySpecification:
+          PointInTimeRecoveryEnabled: true
