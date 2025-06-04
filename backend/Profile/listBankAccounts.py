@@ -1,11 +1,17 @@
 import boto3
 import os
 import json
+from decimal import Decimal
 from common import validate_token_and_get_user
 
 dynamodb = boto3.resource('dynamodb')
 table_name = os.environ["TABLE_BANKACC"]
 table = dynamodb.Table(table_name)
+
+def decimal_default(obj):
+    if isinstance(obj, Decimal):
+        return float(obj)
+    raise TypeError
 
 def lambda_handler(event, context):
     try:
@@ -20,11 +26,12 @@ def lambda_handler(event, context):
         # Incluir el saldo en la respuesta
         accounts = response.get("Items", [])
         for account in accounts:
-            account['saldo'] = account.get('saldo', 0)  # Aseguramos que el saldo esté presente, si no se encuentra, asignamos 0.
+            account['saldo'] = account.get('saldo', 0)
 
         return {
             "statusCode": 200,
-            "body": json.dumps(accounts)
+            "body": json.dumps(accounts, default=decimal_default),
+            "headers": {"Content-Type": "application/json"}
         }
 
     except Exception as e:
