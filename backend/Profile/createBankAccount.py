@@ -19,6 +19,7 @@ def lambda_handler(event, context):
         tipo_cuenta = body['tipo_cuenta']
         alias = body.get('alias', '')
 
+        # Ahora incluimos el atributo 'saldo' en el item de la cuenta bancaria
         item = {
             "usuario_id": user_id,
             "cuenta_id": cuenta_id,
@@ -26,9 +27,11 @@ def lambda_handler(event, context):
             "moneda": moneda,
             "numero_cuenta": numero_cuenta,
             "tipo_cuenta": tipo_cuenta,
-            "alias": alias
+            "alias": alias,
+            "saldo": 0  # Inicializamos el saldo en 0, pero se puede actualizar más tarde
         }
 
+        # Guardamos la cuenta bancaria en la base de datos DynamoDB
         table.put_item(Item=item)
 
         return {

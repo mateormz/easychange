@@ -17,11 +17,14 @@ def lambda_handler(event, context):
 
         if record:
             if now > record['ttl']:
+                # Si la tasa está caducada, obtenemos una nueva tasa
                 rate, timestamp = fetch_rate_for_pair(from_currency, to_currency)
                 save_rate_to_db(from_currency, to_currency, rate, timestamp)
             else:
                 rate = record['rate']
+                timestamp = record['fetched_at']  # Usamos el timestamp de la tasa almacenada
         else:
+            # Si no existe la tasa, la obtenemos de la API externa
             rate, timestamp = fetch_rate_for_pair(from_currency, to_currency)
             save_rate_to_db(from_currency, to_currency, rate, timestamp)
 
@@ -29,6 +32,7 @@ def lambda_handler(event, context):
             'from': from_currency,
             'to': to_currency,
             'rate': rate,
+            'timestamp': timestamp,  # Incluimos el timestamp de la tasa
             'user_id': user_id
         })
     except Exception as e:
