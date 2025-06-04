@@ -3,7 +3,8 @@ import os
 import uuid
 import json
 import time
-from commonExchange import validate_token_and_get_user, get_rate_from_db, fetch_rate_for_pair, save_rate_to_db
+from commonExchange import validate_token_and_get_user, get_rate_from_db, save_rate_to_db
+from commonExchange import ExchangeRateAPI, DynamoDBConnection  # Importa los Singleton
 
 def lambda_handler(event, context):
     try:
@@ -12,17 +13,28 @@ def lambda_handler(event, context):
         from_currency = event['pathParameters']['from'].upper()
         to_currency = event['pathParameters']['to'].upper()
 
+        # Usa DynamoDBConnection Singleton para obtener la referencia a la tabla
+        db_connection = DynamoDBConnection()
+        table = db_connection.get_table()
+
+        # Intenta obtener la tasa de la base de datos
         record = get_rate_from_db(from_currency, to_currency)
         now = int(time.time())
 
+        # Si la tasa está en la base de datos
         if record:
+            # Si el TTL ya ha expirado, realiza una nueva consulta a la API externa
             if now > record['ttl']:
-                rate, timestamp = fetch_rate_for_pair(from_currency, to_currency)
+                # Usa ExchangeRateAPI Singleton para consultar la API externa
+                exchange_api = ExchangeRateAPI()
+                rate, timestamp = exchange_api.fetch_rate_for_pair(from_currency, to_currency)
                 save_rate_to_db(from_currency, to_currency, rate, timestamp)
             else:
                 rate = record['rate']
         else:
-            rate, timestamp = fetch_rate_for_pair(from_currency, to_currency)
+            # Si no hay registro, realiza la consulta a la API externa
+            exchange_api = ExchangeRateAPI()
+            rate, timestamp = exchange_api.fetch_rate_for_pair(from_currency, to_currency)
             save_rate_to_db(from_currency, to_currency, rate, timestamp)
 
         return respond(200, {

@@ -5,9 +5,62 @@ import time
 import urllib.request
 import urllib.parse
 
-# Inicializa recurso DynamoDB y tabla
-dynamodb = boto3.resource('dynamodb')
-table = dynamodb.Table(os.environ['RATES_TABLE'])
+# Singleton para la configuración de la API externa (URL y API Key)
+class ExchangeRateAPI:
+    _instance = None
+
+    def __new__(cls):
+        if cls._instance is None:
+            cls._instance = super(ExchangeRateAPI, cls).__new__(cls)
+            cls._instance.api_url = os.environ['EXTERNAL_API_URL']
+            cls._instance.api_key = os.environ['EXCHANGE_API_ACCESS_KEY']
+        return cls._instance
+
+    def get_api_url(self):
+        return self.api_url
+
+    def get_api_key(self):
+        return self.api_key
+
+    def fetch_rate_for_pair(self, source, target):
+        """
+        Obtiene la tasa puntual de cambio entre source y target desde la API externa.
+        """
+        params = {
+            'access_key': self.api_key,
+            'source': source,
+            'currencies': target
+        }
+        url = f"{self.api_url}/live?" + urllib.parse.urlencode(params)
+        with urllib.request.urlopen(url) as response:
+            data = json.loads(response.read().decode())
+        if not data.get('success'):
+            raise Exception(f"API error: {data}")
+        quotes = data['quotes']
+        key = source + target
+        if key not in quotes:
+            raise Exception(f"Rate not found for {source}->{target}")
+        return str(quotes[key]), data['timestamp']  # guardamos como string
+
+
+# Singleton para la conexión a DynamoDB
+class DynamoDBConnection:
+    _instance = None
+
+    def __new__(cls):
+        if cls._instance is None:
+            cls._instance = super(DynamoDBConnection, cls).__new__(cls)
+            cls._instance.dynamodb = boto3.resource('dynamodb')
+            cls._instance.table = cls._instance.dynamodb.Table(os.environ['RATES_TABLE'])
+        return cls._instance
+
+    def get_table(self):
+        return self.table
+
+
+# Inicializa recurso DynamoDB y tabla (usando Singleton para la conexión)
+dynamodb_connection = DynamoDBConnection()
+table = dynamodb_connection.get_table()
 
 # Variables de entorno para la API externa y TTL
 API_URL = os.environ['EXTERNAL_API_URL']
@@ -47,11 +100,13 @@ def fetch_rates_for_source(source):
     Obtiene todas las tasas de cambio desde 'source' usando la API externa.
     Retorna un diccionario con las tasas y el timestamp de la consulta.
     """
+    # Usar el Singleton de la API para obtener la configuración
+    exchange_api = ExchangeRateAPI()
     params = {
-        'access_key': API_KEY,
+        'access_key': exchange_api.get_api_key(),
         'source': source
     }
-    url = f"{API_URL}/live?" + urllib.parse.urlencode(params)
+    url = f"{exchange_api.get_api_url()}/live?" + urllib.parse.urlencode(params)
     with urllib.request.urlopen(url) as response:
         data = json.loads(response.read().decode())
     if not data.get('success'):
@@ -63,12 +118,14 @@ def fetch_rate_for_pair(source, target):
     """
     Obtiene la tasa puntual de cambio entre source y target desde la API externa.
     """
+    # Usar el Singleton de la API para obtener la configuración
+    exchange_api = ExchangeRateAPI()
     params = {
-        'access_key': API_KEY,
+        'access_key': exchange_api.get_api_key(),
         'source': source,
         'currencies': target
     }
-    url = f"{API_URL}/live?" + urllib.parse.urlencode(params)
+    url = f"{exchange_api.get_api_url()}/live?" + urllib.parse.urlencode(params)
     with urllib.request.urlopen(url) as response:
         data = json.loads(response.read().decode())
     if not data.get('success'):
