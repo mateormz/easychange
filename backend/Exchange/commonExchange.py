@@ -42,6 +42,22 @@ class ExchangeRateAPI:
             raise Exception(f"Rate not found for {source}->{target}")
         return str(quotes[key]), data['timestamp']  # guardamos como string
 
+    def fetch_rates_for_source(self, source):
+        """
+        Obtiene todas las tasas de cambio desde 'source' usando la API externa.
+        Retorna un diccionario con las tasas y el timestamp de la consulta.
+        """
+        params = {
+            'access_key': self.api_key,
+            'source': source
+        }
+        url = f"{self.api_url}/live?" + urllib.parse.urlencode(params)
+        with urllib.request.urlopen(url) as response:
+            data = json.loads(response.read().decode())
+        if not data.get('success'):
+            raise Exception(f"API error: {data}")
+        return data['quotes'], data['timestamp']
+
 
 # Singleton para la conexión a DynamoDB
 class DynamoDBConnection:
@@ -93,48 +109,6 @@ def validate_token_and_get_user(event):
 
     user_info = json.loads(validation_result.get('body', '{}'))
     return user_info.get('user_id')
-
-
-def fetch_rates_for_source(source):
-    """
-    Obtiene todas las tasas de cambio desde 'source' usando la API externa.
-    Retorna un diccionario con las tasas y el timestamp de la consulta.
-    """
-    # Usar el Singleton de la API para obtener la configuración
-    exchange_api = ExchangeRateAPI()
-    params = {
-        'access_key': exchange_api.get_api_key(),
-        'source': source
-    }
-    url = f"{exchange_api.get_api_url()}/live?" + urllib.parse.urlencode(params)
-    with urllib.request.urlopen(url) as response:
-        data = json.loads(response.read().decode())
-    if not data.get('success'):
-        raise Exception(f"API error: {data}")
-    return data['quotes'], data['timestamp']
-
-
-def fetch_rate_for_pair(source, target):
-    """
-    Obtiene la tasa puntual de cambio entre source y target desde la API externa.
-    """
-    # Usar el Singleton de la API para obtener la configuración
-    exchange_api = ExchangeRateAPI()
-    params = {
-        'access_key': exchange_api.get_api_key(),
-        'source': source,
-        'currencies': target
-    }
-    url = f"{exchange_api.get_api_url()}/live?" + urllib.parse.urlencode(params)
-    with urllib.request.urlopen(url) as response:
-        data = json.loads(response.read().decode())
-    if not data.get('success'):
-        raise Exception(f"API error: {data}")
-    quotes = data['quotes']
-    key = source + target
-    if key not in quotes:
-        raise Exception(f"Rate not found for {source}->{target}")
-    return str(quotes[key]), data['timestamp']  # guardamos como string
 
 
 def save_rates_to_db(quotes, timestamp):

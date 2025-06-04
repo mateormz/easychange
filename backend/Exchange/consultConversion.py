@@ -26,14 +26,14 @@ def lambda_handler(event, context):
             # Si el TTL ya ha expirado, realiza una nueva consulta a la API externa
             if now > record['ttl']:
                 # Usa ExchangeRateAPI Singleton para consultar la API externa
-                exchange_api = ExchangeRateAPI()
+                exchange_api = ExchangeRateAPI()  # Instancia del Singleton
                 rate, timestamp = exchange_api.fetch_rate_for_pair(from_currency, to_currency)
                 save_rate_to_db(from_currency, to_currency, rate, timestamp)
             else:
                 rate = record['rate']
         else:
             # Si no hay registro, realiza la consulta a la API externa
-            exchange_api = ExchangeRateAPI()
+            exchange_api = ExchangeRateAPI()  # Instancia del Singleton
             rate, timestamp = exchange_api.fetch_rate_for_pair(from_currency, to_currency)
             save_rate_to_db(from_currency, to_currency, rate, timestamp)
 
