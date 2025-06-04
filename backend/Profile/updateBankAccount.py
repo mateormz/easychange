@@ -18,10 +18,15 @@ def lambda_handler(event, context):
                 'body': json.dumps({'error': 'Request body is missing'})
             }
 
+        # Asegurarse de que el saldo siempre sea un string, incluso si no está presente en el body
+        if 'saldo' in body:
+            body['saldo'] = str(body['saldo'])  # Convertir saldo a string
+
         update_expression = "SET " + ", ".join(f"#{k} = :{k}" for k in body)
         expression_attribute_names = {f"#{k}": k for k in body}
         expression_attribute_values = {f":{k}": v for k, v in body.items()}
 
+        # Realizar la actualización en DynamoDB
         table.update_item(
             Key={
                 'usuario_id': user_id,
