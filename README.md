@@ -47,7 +47,7 @@ easychange/
 ## 📚 Documentación de Endpoints
 
 Puedes acceder a la colección Postman completa aquí:  
-👉 [Documentación de la API](https://www.postman.com/collections/tu-link-aqui)
+👉 [Documentación de la API](https://www.postman.com/atrapagemas/easychange)
 
 ## ⚙️ Configuración
 
