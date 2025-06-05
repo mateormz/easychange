@@ -19,7 +19,6 @@ def validate_token_and_get_user(event):
     """
     # Obtener el token del encabezado
     token = event.get('headers', {}).get('Authorization')
-
     print(f"Token extraído del encabezado: {token}")  # Registro para depuración
 
     if not token:
@@ -66,6 +65,7 @@ def validate_token_and_get_user(event):
         }
 
 
+
 def fetch_rate_for_pair_from_exchange(source, target, token):
     """
     Llama a la función Lambda del servicio de cambio de divisas para obtener la tasa de cambio entre dos monedas.
@@ -75,11 +75,10 @@ def fetch_rate_for_pair_from_exchange(source, target, token):
         "pathParameters": {
             "from": source,
             "to": target
+        },
+        "headers": {
+            "Authorization": token  # Pasamos el token dentro del payload
         }
-    }
-
-    headers = {
-        'Authorization': token  # Agregar el token a los encabezados
     }
 
     try:
@@ -87,9 +86,7 @@ def fetch_rate_for_pair_from_exchange(source, target, token):
         response = lambda_client.invoke(
             FunctionName=function_name,
             InvocationType='RequestResponse',  # Llamada síncrona
-            Payload=json.dumps(payload),
-            # Pasar los encabezados en la invocación
-            **{'headers': headers}
+            Payload=json.dumps(payload)  # El token ahora está dentro del payload
         )
 
         # Leer la respuesta
@@ -111,12 +108,12 @@ def fetch_rate_for_pair_from_exchange(source, target, token):
 
 
 
-def get_account_by_id_from_profile(user_id, account_id):
-    """
-    Llama a la función Lambda del servicio de perfil para obtener la cuenta bancaria de un usuario.
-    """
+
+def get_account_by_id_from_profile(user_id, account_id, token):
     function_name = f"{PROFILE_SERVICE_NAME}-{os.environ['STAGE']}-listBankAccounts"
-    payload = {"body": json.dumps({"user_id": user_id, "account_id": account_id})}
+    payload = {
+        "body": json.dumps({"user_id": user_id, "account_id": account_id, "Authorization": token})
+    }
     response = lambda_client.invoke(
         FunctionName=function_name,
         InvocationType='RequestResponse',
@@ -126,16 +123,16 @@ def get_account_by_id_from_profile(user_id, account_id):
     return result
 
 
-def update_balance_in_profile(user_id, account_id, amount):
-    """
-    Llama a la función Lambda del servicio de perfil para actualizar el saldo de una cuenta bancaria.
-    """
+def update_balance_in_profile(user_id, account_id, amount, token):
     function_name = f"{PROFILE_SERVICE_NAME}-{os.environ['STAGE']}-updateBankAccount"
-    payload = {"body": json.dumps({
-        "user_id": user_id,
-        "account_id": account_id,
-        "amount": amount
-    })}
+    payload = {
+        "body": json.dumps({
+            "user_id": user_id,
+            "account_id": account_id,
+            "amount": amount,
+            "Authorization": token  # Incluir el token en el Payload
+        })
+    }
     response = lambda_client.invoke(
         FunctionName=function_name,
         InvocationType='RequestResponse',
@@ -143,3 +140,4 @@ def update_balance_in_profile(user_id, account_id, amount):
     )
     result = json.loads(response['Payload'].read())
     return result
+
