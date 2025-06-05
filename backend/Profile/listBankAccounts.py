@@ -8,7 +8,6 @@ dynamodb = boto3.resource('dynamodb')
 table_name = os.environ["TABLE_BANKACC"]
 table = dynamodb.Table(table_name)
 
-
 def lambda_handler(event, context):
     try:
         # Validar token y obtener el ID del usuario

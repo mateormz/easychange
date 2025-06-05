@@ -18,8 +18,9 @@ def lambda_handler(event, context):
         numero_cuenta = body['numero_cuenta']
         tipo_cuenta = body['tipo_cuenta']
         alias = body.get('alias', '')
+        saldo = body.get('saldo', "0")  # Tomar el saldo que viene en la solicitud, si no, usar "0"
 
-        # Incluimos el atributo 'saldo' como string, inicializado en "0"
+        # Incluimos el atributo 'saldo' como el valor que se recibe en el cuerpo de la solicitud
         item = {
             "usuario_id": user_id,
             "cuenta_id": cuenta_id,
@@ -28,7 +29,7 @@ def lambda_handler(event, context):
             "numero_cuenta": numero_cuenta,
             "tipo_cuenta": tipo_cuenta,
             "alias": alias,
-            "saldo": "0"  # saldo inicial como string
+            "saldo": str(saldo)  # Convertir el saldo a string
         }
 
         # Guardamos la cuenta bancaria en la tabla DynamoDB
