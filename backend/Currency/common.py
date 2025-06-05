@@ -115,9 +115,10 @@ def get_account_balance_from_profile(user_id, account_id, token):
         "body": json.dumps({"user_id": user_id})  # Pasamos el user_id para obtener las cuentas
     }
 
-    # Asegúrate de pasar el token en los encabezados correctamente
-    headers = {
-        "Authorization": token  # Incluir el token en los encabezados
+    # El token debe ir dentro del payload, no en los headers
+    token_payload = {
+        "body": payload["body"],
+        "headers": {"Authorization": token}  # El token aquí está en el payload, no en los headers de la invocación
     }
 
     try:
@@ -125,9 +126,7 @@ def get_account_balance_from_profile(user_id, account_id, token):
         response = lambda_client.invoke(
             FunctionName=function_name,
             InvocationType='RequestResponse',
-            Payload=json.dumps(payload),
-            # Pasar los encabezados con el token
-            **{'headers': headers}
+            Payload=json.dumps(token_payload),  # Pasa el token en el payload
         )
 
         # Parsear la respuesta de la Lambda
@@ -154,10 +153,6 @@ def get_account_balance_from_profile(user_id, account_id, token):
         raise Exception(f"Error fetching account balance: {str(e)}")
 
 
-
-
-
-
 def update_balance_in_profile(user_id, account_id, amount, token):
     """
     Actualiza el saldo de una cuenta bancaria del usuario invocando la Lambda correspondiente
@@ -174,9 +169,10 @@ def update_balance_in_profile(user_id, account_id, amount, token):
         })
     }
 
-    # Los encabezados incluirán el token de autorización
-    headers = {
-        "Authorization": token  # Incluir el token en los encabezados
+    # Poner el token dentro del payload
+    token_payload = {
+        "body": payload["body"],
+        "headers": {"Authorization": token}  # Incluir el token aquí dentro del payload
     }
 
     try:
@@ -184,17 +180,16 @@ def update_balance_in_profile(user_id, account_id, amount, token):
         response = lambda_client.invoke(
             FunctionName=function_name,
             InvocationType='RequestResponse',  # Llamada síncrona
-            Payload=json.dumps(payload),
-            # Pasamos los encabezados en la invocación
-            **{'headers': headers}
+            Payload=json.dumps(token_payload),  # Pasa el token dentro del payload
         )
 
         # Leer la respuesta de la Lambda
-        result = json.loads(response['Payload'].read())
+        result = json.loads(response['Payload'].read().decode())
 
         # Devolver el resultado de la invocación
         return result
 
     except Exception as e:
         raise Exception(f"Error al actualizar el saldo de la cuenta: {str(e)}")
+
 
