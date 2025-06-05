@@ -1,13 +1,12 @@
 import os
 import json
-from singleton import get_dynamodb, get_lambda_client
+from singleton import get_dynamodb
 
 def lambda_handler(event, context):
     try:
         print("[INFO] Received event:", json.dumps(event, indent=2))
 
         dynamodb = get_dynamodb()
-        lambda_client = get_lambda_client()
 
         try:
             user_table_name = os.environ['TABLE_USERS']
