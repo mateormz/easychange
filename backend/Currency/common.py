@@ -65,7 +65,6 @@ def validate_token_and_get_user(event):
         }
 
 
-
 def fetch_rate_for_pair_from_exchange(source, target, token):
     """
     Llama a la función Lambda del servicio de cambio de divisas para obtener la tasa de cambio entre dos monedas.
@@ -106,38 +105,81 @@ def fetch_rate_for_pair_from_exchange(source, target, token):
         raise Exception(f"Failed to fetch exchange rate via Lambda: {str(e)}")
 
 
-
-
-
-def get_account_by_id_from_profile(user_id, account_id, token):
-    function_name = f"{PROFILE_SERVICE_NAME}-{os.environ['STAGE']}-listBankAccounts"
+def get_account_by_id_from_profile(user_id, account_id):
+    """
+    Llama a la Lambda del servicio de perfil para obtener las cuentas bancarias de un usuario
+    y luego filtra la cuenta con el account_id correspondiente.
+    """
+    function_name = f"{PROFILE_SERVICE_NAME}-{os.environ['STAGE']}-listarCuentas"
     payload = {
-        "body": json.dumps({"user_id": user_id, "account_id": account_id, "Authorization": token})
+        "body": json.dumps({"user_id": user_id})
     }
-    response = lambda_client.invoke(
-        FunctionName=function_name,
-        InvocationType='RequestResponse',
-        Payload=json.dumps(payload)
-    )
-    result = json.loads(response['Payload'].read())
-    return result
+
+    try:
+        # Invocar la Lambda de cuentas
+        response = lambda_client.invoke(
+            FunctionName=function_name,
+            InvocationType='RequestResponse',
+            Payload=json.dumps(payload)
+        )
+
+        # Parsear la respuesta de la Lambda
+        response_payload = json.loads(response['Payload'].read().decode())
+
+        # Verificar que la respuesta tenga cuentas
+        accounts = response_payload.get('body', [])
+        if not accounts:
+            raise Exception("No accounts found for the user.")
+
+        # Buscar la cuenta correspondiente por account_id
+        account = next((acc for acc in accounts if acc['account_id'] == account_id), None)
+        if not account:
+            raise Exception("Account not found.")
+
+        # Retornar el saldo de la cuenta
+        return account.get('saldo', 0)  # Si no tiene saldo, retorna 0
+
+    except Exception as e:
+        raise Exception(f"Error fetching account balance: {str(e)}")
 
 
 def update_balance_in_profile(user_id, account_id, amount, token):
-    function_name = f"{PROFILE_SERVICE_NAME}-{os.environ['STAGE']}-updateBankAccount"
+    """
+    Actualiza el saldo de una cuenta bancaria del usuario invocando la Lambda correspondiente
+    en el servicio de perfil. El token de autorización se pasa en los encabezados.
+    """
+    function_name = f"{PROFILE_SERVICE_NAME}-{os.environ['STAGE']}-actualizarCuenta"
+
+    # Preparar el cuerpo del payload sin el token
     payload = {
         "body": json.dumps({
             "user_id": user_id,
             "account_id": account_id,
-            "amount": amount,
-            "Authorization": token  # Incluir el token en el Payload
+            "amount": amount
         })
     }
-    response = lambda_client.invoke(
-        FunctionName=function_name,
-        InvocationType='RequestResponse',
-        Payload=json.dumps(payload)
-    )
-    result = json.loads(response['Payload'].read())
-    return result
+
+    # Los encabezados incluirán el token de autorización
+    headers = {
+        "Authorization": token  # Incluir el token en los encabezados
+    }
+
+    try:
+        # Invocar la Lambda de actualización de saldo
+        response = lambda_client.invoke(
+            FunctionName=function_name,
+            InvocationType='RequestResponse',  # Llamada síncrona
+            Payload=json.dumps(payload),
+            # Pasamos los encabezados en la invocación
+            **{'headers': headers}
+        )
+
+        # Leer la respuesta de la Lambda
+        result = json.loads(response['Payload'].read())
+
+        # Devolver el resultado de la invocación
+        return result
+
+    except Exception as e:
+        raise Exception(f"Error al actualizar el saldo de la cuenta: {str(e)}")
 
