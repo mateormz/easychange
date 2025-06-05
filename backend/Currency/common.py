@@ -19,6 +19,9 @@ def validate_token_and_get_user(event):
     """
     # Obtener el token del encabezado
     token = event.get('headers', {}).get('Authorization')
+
+    print(f"Token extraído del encabezado: {token}")  # Registro para depuración
+
     if not token:
         return {
             "statusCode": 400,
@@ -43,6 +46,8 @@ def validate_token_and_get_user(event):
         # Parsear la respuesta de la Lambda
         validation_result = json.loads(response['Payload'].read().decode())
 
+        print(f"Respuesta de validación del token: {validation_result}")  # Registro para depuración
+
         if validation_result.get('statusCode') != 200:
             return {
                 "statusCode": validation_result.get('statusCode'),
@@ -54,6 +59,7 @@ def validate_token_and_get_user(event):
         return user_info.get('user_id')
 
     except Exception as e:
+        print(f"Error al validar el token: {str(e)}")  # Registro para depuración
         return {
             "statusCode": 500,
             "body": json.dumps({"error": f"Error al validar el token: {str(e)}"})
@@ -73,6 +79,9 @@ def fetch_rate_for_pair_from_exchange(source, target):
         }
     }
 
+    print(
+        f"Invocando Lambda para obtener tasa de cambio: {function_name} con payload: {payload}")  # Registro para depuración
+
     try:
         # Invocar la función Lambda que devuelve la tasa de cambio
         response = lambda_client.invoke(
@@ -83,6 +92,8 @@ def fetch_rate_for_pair_from_exchange(source, target):
 
         # Leer la respuesta
         response_payload = json.loads(response['Payload'].read().decode())
+
+        print(f"Respuesta de Lambda para tasa de cambio: {response_payload}")  # Registro para depuración
 
         # Verificar si la respuesta tiene una tasa de cambio válida
         if response_payload.get('statusCode') != 200:
@@ -96,6 +107,7 @@ def fetch_rate_for_pair_from_exchange(source, target):
         return str(data["rate"])
 
     except Exception as e:
+        print(f"Error al obtener la tasa de cambio: {str(e)}")  # Registro para depuración
         raise Exception(f"Failed to fetch exchange rate via Lambda: {str(e)}")
 
 
