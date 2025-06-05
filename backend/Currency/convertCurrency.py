@@ -3,7 +3,12 @@ from common import validate_token_and_get_user, fetch_rate_for_pair_from_exchang
 
 def lambda_handler(event, context):
     try:
-        # Obtener el token y el usuario
+        # Obtener el token del encabezado de la solicitud
+        token = event.get('headers', {}).get('Authorization')
+        if not token:
+            return respond(400, {'error': 'Authorization token is missing'})
+
+        # Validar el token y obtener el user_id
         user_id = validate_token_and_get_user(event)
 
         # Parsear el cuerpo del evento
@@ -37,6 +42,7 @@ def lambda_handler(event, context):
             'convertedAmount': round(converted_amount, 2),
             'exchangeRate': rate
         })
+
     except Exception as e:
         return respond(500, {'error': str(e)})
 
