@@ -31,6 +31,7 @@ functions:
           method: get
           cors: true
 
+
   actualizarCuenta:
     handler: updateBankAccount.lambda_handler
     events:
@@ -38,6 +39,7 @@ functions:
           path: profile/bankacc/{cuenta_id}
           method: put
           cors: true
+
 
   eliminarCuenta:
     handler: deleteBankAccount.lambda_handler
