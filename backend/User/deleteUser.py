@@ -1,12 +1,13 @@
-import boto3
 import os
 import json
+from singleton import get_dynamodb, get_lambda_client  # Usamos el singleton
 
 def lambda_handler(event, context):
     try:
         print("[INFO] Received event:", json.dumps(event, indent=2))
 
-        dynamodb = boto3.resource('dynamodb')
+        dynamodb = get_dynamodb()
+        lambda_client = get_lambda_client()
 
         # Load environment variables
         try:
@@ -38,7 +39,6 @@ def lambda_handler(event, context):
             }
 
         # Validate token via Lambda
-        lambda_client = boto3.client('lambda')
         payload = {"body": json.dumps({"token": token})}
         print("[INFO] Invoking validateToken function")
         validate_response = lambda_client.invoke(

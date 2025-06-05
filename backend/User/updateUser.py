@@ -1,14 +1,16 @@
-import boto3
 import os
 import json
+from singleton import get_dynamodb, get_lambda_client  # Singleton imports
 
 def lambda_handler(event, context):
     try:
         print("[INFO] Received event:", json.dumps(event, indent=2))
 
-        dynamodb = boto3.resource('dynamodb')
+        # Usar instancias Singleton
+        dynamodb = get_dynamodb()
+        lambda_client = get_lambda_client()
 
-        # Load environment variables
+        # Cargar variables de entorno
         try:
             user_table_name = os.environ['TABLE_USERS']
             validate_function_name = f"{os.environ['SERVICE_NAME']}-{os.environ['STAGE']}-{os.environ['VALIDATE_TOKEN_FUNCTION']}"
@@ -25,7 +27,7 @@ def lambda_handler(event, context):
 
         user_table = dynamodb.Table(user_table_name)
 
-        # Get token from headers
+        # Obtener token
         token = event.get('headers', {}).get('Authorization')
         print(f"[DEBUG] Authorization token: {token}")
 
@@ -37,8 +39,7 @@ def lambda_handler(event, context):
                 'body': json.dumps({'error': 'Authorization token is missing'})
             }
 
-        # Validate token
-        lambda_client = boto3.client('lambda')
+        # Validar token
         payload = {"body": json.dumps({"token": token})}
         print("[INFO] Invoking validateToken function")
         validate_response = lambda_client.invoke(
@@ -61,7 +62,7 @@ def lambda_handler(event, context):
         authenticated_user_id = user_info.get('user_id')
         print(f"[INFO] Authenticated user_id: {authenticated_user_id}")
 
-        # Get user_id from path parameter
+        # Obtener user_id del path
         try:
             user_id = event['pathParameters']['user_id']
             print(f"[INFO] Path parameter retrieved: user_id={user_id}")
@@ -73,7 +74,7 @@ def lambda_handler(event, context):
                 'body': json.dumps({'error': f'Missing path parameter: {str(path_error)}'})
             }
 
-        # Authorization check
+        # Verificación de autorización
         if user_id != authenticated_user_id:
             print("[WARNING] User is attempting to update unauthorized resources")
             return {
@@ -82,7 +83,7 @@ def lambda_handler(event, context):
                 'body': json.dumps({'error': 'Unauthorized - You can only update your own account'})
             }
 
-        # Check if user exists
+        # Verificar existencia del usuario
         print(f"[INFO] Checking if user exists: user_id={user_id}")
         user_check = user_table.get_item(Key={'user_id': user_id})
         print(f"[DEBUG] get_item response: {user_check}")
@@ -95,7 +96,7 @@ def lambda_handler(event, context):
                 'body': json.dumps({'error': 'User not found'})
             }
 
-        # Parse body
+        # Parsear body
         try:
             body = json.loads(event.get('body', '{}'))
             print(f"[DEBUG] Body parsed: {body}")
@@ -115,12 +116,12 @@ def lambda_handler(event, context):
                 'body': json.dumps({'error': 'Request body is missing'})
             }
 
-        # Prepare update expression
+        # Construir expresión de actualización
         update_expression = "SET " + ", ".join(f"#{k} = :{k}" for k in body)
         expression_attribute_names = {f"#{k}": k for k in body}
         expression_attribute_values = {f":{k}": v for k, v in body.items()}
 
-        # Update user in DynamoDB
+        # Actualizar en DynamoDB
         print("[INFO] Updating user in DynamoDB")
         user_table.update_item(
             Key={'user_id': user_id},

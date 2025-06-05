@@ -1,16 +1,16 @@
-import boto3
 from datetime import datetime
 import os
 import json
+from singleton import get_dynamodb  # Importar instancia Singleton
 
 def lambda_handler(event, context):
     try:
         print("[INFO] Received event:", json.dumps(event, indent=2))
 
-        # Initialize DynamoDB
-        dynamodb = boto3.resource('dynamodb')
+        # Obtener instancia Singleton de DynamoDB
+        dynamodb = get_dynamodb()
 
-        # Environment variable
+        # Cargar variable de entorno
         try:
             token_table_name = os.environ['TABLE_TOKENS']
             print("[INFO] Environment variable loaded successfully")
@@ -24,7 +24,7 @@ def lambda_handler(event, context):
 
         table = dynamodb.Table(token_table_name)
 
-        # Get token from request body
+        # Obtener token desde el body
         if not event.get('body'):
             return {
                 'statusCode': 400,
@@ -49,11 +49,11 @@ def lambda_handler(event, context):
                 'body': json.dumps({'error': 'Token not provided'})
             }
 
-        # Get token from table (by primary key)
+        # Consultar token en DynamoDB
         print(f"[INFO] Getting token from table: {token}")
         response = table.get_item(Key={'token': token})
-
         token_data = response.get('Item')
+
         if not token_data:
             return {
                 'statusCode': 403,
