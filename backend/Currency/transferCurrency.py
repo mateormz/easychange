@@ -4,49 +4,12 @@ import uuid
 from datetime import datetime
 from common import (
     validate_token_and_get_user,
-    fetch_rate_for_pair_from_exchange
+    fetch_rate_for_pair_from_exchange,
+    get_account_by_id_from_profile,  # Importar la función correcta
+    update_balance_in_profile
 )
 
 lambda_client = boto3.client('lambda')
-
-
-def get_account_balance_from_profile(user_id, account_id):
-    """
-    Llama a la Lambda del servicio de perfil para obtener las cuentas bancarias del usuario
-    y luego filtra la cuenta específica para obtener el saldo.
-    """
-    function_name = "easychange-profile-api-dev-listBankAccounts"  # Nombre de la función Lambda que consulta las cuentas
-    payload = {
-        "body": json.dumps({"user_id": user_id})  # Pasamos el user_id para obtener las cuentas
-    }
-
-    try:
-        # Invocar la Lambda de cuentas
-        response = lambda_client.invoke(
-            FunctionName=function_name,
-            InvocationType='RequestResponse',
-            Payload=json.dumps(payload)
-        )
-
-        # Parsear la respuesta de la Lambda
-        response_payload = json.loads(response['Payload'].read().decode())
-
-        # Verificar que la respuesta tenga cuentas
-        accounts = response_payload.get('body', [])
-        if not accounts:
-            raise Exception("No accounts found for the user.")
-
-        # Buscar la cuenta correspondiente por account_id
-        account = next((acc for acc in accounts if acc['account_id'] == account_id), None)
-        if not account:
-            raise Exception("Account not found.")
-
-        # Retornar el saldo de la cuenta
-        return account.get('saldo', 0)  # Si no tiene saldo, retorna 0
-
-    except Exception as e:
-        raise Exception(f"Error fetching account balance: {str(e)}")
-
 
 def lambda_handler(event, context):
     try:
@@ -79,8 +42,11 @@ def lambda_handler(event, context):
         to_currency = to_currency.upper()
 
         # Obtener el saldo de las cuentas del usuario
-        from_balance = get_account_balance_from_profile(from_user_id, from_account_id)
-        to_balance = get_account_balance_from_profile(to_user_id, to_account_id)
+        try:
+            from_balance = get_account_by_id_from_profile(from_user_id, from_account_id, token)
+            to_balance = get_account_by_id_from_profile(to_user_id, to_account_id, token)
+        except Exception as e:
+            return respond(500, {'error': f'Error fetching account balance: {str(e)}'})
 
         if from_balance < amount:
             return respond(400, {'error': 'Insufficient balance in source account'})
@@ -102,8 +68,11 @@ def lambda_handler(event, context):
         timestamp = datetime.utcnow().isoformat()
 
         # Actualizaciones (idealmente se haría con transacciones)
-        update_balance_in_profile(from_user_id, from_account_id, -amount)
-        update_balance_in_profile(to_user_id, to_account_id, converted_amount)
+        try:
+            update_balance_in_profile(from_user_id, from_account_id, -amount, token)
+            update_balance_in_profile(to_user_id, to_account_id, converted_amount, token)
+        except Exception as e:
+            return respond(500, {'error': f'Error updating balance: {str(e)}'})
 
         # Preparar la respuesta
         return respond(200, {
