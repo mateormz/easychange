@@ -15,7 +15,7 @@ provider:
   environment:
     USER_CONVERSIONS_TABLE: ${self:provider.stage}-user-conversions
     USER_REPORTS_TABLE: ${self:provider.stage}-user-reports
-    EXCHANGE_API_URL: https://uy586ziqy9.execute-api.us-east-1.amazonaws.com
+    EXCHANGE_API_URL: https://uy586ziqy9.execute-api.us-east-1.amazonaws.com #2
     EXCHANGE_API_ACCESS_KEY: your-access-key-here
     PROFILE_SERVICE_NAME: easychange-profile-api
     EXCHANGE_SERVICE_NAME: exchange-rate-api
