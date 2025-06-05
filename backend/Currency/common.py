@@ -112,7 +112,12 @@ def get_account_balance_from_profile(user_id, account_id, token):
     """
     function_name = f"{PROFILE_SERVICE_NAME}-{os.environ['STAGE']}-listarCuentas"  # Función para listar las cuentas
     payload = {
-        "body": json.dumps({"user_id": user_id, "account_id": account_id, "token": token})  # Pasamos el token dentro del cuerpo
+        "body": json.dumps({"user_id": user_id})  # Pasamos el user_id para obtener las cuentas
+    }
+
+    # Asegúrate de pasar el token en los encabezados correctamente
+    headers = {
+        "Authorization": token  # Incluir el token en los encabezados
     }
 
     try:
@@ -120,26 +125,25 @@ def get_account_balance_from_profile(user_id, account_id, token):
         response = lambda_client.invoke(
             FunctionName=function_name,
             InvocationType='RequestResponse',
-            Payload=json.dumps(payload)  # Pasamos solo el Payload aquí sin headers
+            Payload=json.dumps(payload),
+            # Pasar los encabezados con el token
+            **{'headers': headers}
         )
 
         # Parsear la respuesta de la Lambda
         response_payload = json.loads(response['Payload'].read().decode())
 
-        # Verificar que la respuesta tenga una clave 'body' y manejar correctamente los tipos de datos
-        body = response_payload.get('body', '{}')
-
-        # Si 'body' es una cadena, lo convertimos en un objeto JSON
+        # Verificar que la respuesta tenga una clave 'body' que contenga la lista de cuentas
+        body = response_payload.get('body', [])
         if isinstance(body, str):
-            body = json.loads(body)
+            body = json.loads(body)  # Si es cadena, convertirla a JSON
 
         # Verificar que tenemos cuentas
-        accounts = body.get('Items', [])
-        if not accounts:
+        if not body:
             raise Exception("No accounts found for the user.")
 
         # Buscar la cuenta correspondiente por account_id
-        account = next((acc for acc in accounts if acc['account_id'] == account_id), None)
+        account = next((acc for acc in body if acc['cuenta_id'] == account_id), None)
         if not account:
             raise Exception("Account not found.")
 
@@ -148,6 +152,7 @@ def get_account_balance_from_profile(user_id, account_id, token):
 
     except Exception as e:
         raise Exception(f"Error fetching account balance: {str(e)}")
+
 
 
 
