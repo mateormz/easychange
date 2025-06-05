@@ -5,7 +5,7 @@ from datetime import datetime
 from common import (
     validate_token_and_get_user,
     fetch_rate_for_pair_from_exchange,
-    get_account_by_id_from_profile,  # Función actualizada
+    get_account_balance_from_profile,  # Llamada correcta a la función
     update_balance_in_profile
 )
 
@@ -43,12 +43,11 @@ def lambda_handler(event, context):
 
         # Obtener el saldo de las cuentas del usuario
         try:
-            from_balance = get_account_by_id_from_profile(from_user_id, from_account_id, token)
-            to_balance = get_account_by_id_from_profile(to_user_id, to_account_id, token)
+            from_balance = get_account_balance_from_profile(from_user_id, from_account_id, token)
+            to_balance = get_account_balance_from_profile(to_user_id, to_account_id, token)
         except Exception as e:
             return respond(500, {'error': f'Error fetching account balance: {str(e)}'})
 
-        # Verificar si la cuenta de origen tiene suficiente saldo
         if from_balance < amount:
             return respond(400, {'error': 'Insufficient balance in source account'})
 

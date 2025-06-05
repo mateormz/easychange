@@ -105,19 +105,19 @@ def fetch_rate_for_pair_from_exchange(source, target, token):
         raise Exception(f"Failed to fetch exchange rate via Lambda: {str(e)}")
 
 
-def get_account_by_id_from_profile(user_id, account_id, token):
+def get_account_balance_from_profile(user_id, account_id, token):
     """
-    Llama a la Lambda del servicio de perfil para obtener las cuentas bancarias de un usuario
-    y luego filtra la cuenta con el account_id correspondiente.
+    Llama a la Lambda del servicio de perfil para obtener las cuentas bancarias del usuario
+    y luego filtra la cuenta específica para obtener el saldo.
     """
-    function_name = f"{PROFILE_SERVICE_NAME}-{os.environ['STAGE']}-listarCuentas"
-
+    function_name = f"easychange-profile-api-{os.environ['STAGE']}-listarCuentas"  # Función para listar las cuentas
     payload = {
         "body": json.dumps({"user_id": user_id})  # Pasamos el user_id para obtener las cuentas
     }
 
+    # Asegúrate de pasar el token en los encabezados correctamente
     headers = {
-        "Authorization": token  # Agregar el token en los encabezados
+        "Authorization": token  # Incluir el token en los encabezados
     }
 
     try:
@@ -126,7 +126,8 @@ def get_account_by_id_from_profile(user_id, account_id, token):
             FunctionName=function_name,
             InvocationType='RequestResponse',
             Payload=json.dumps(payload),
-            **{'headers': headers}  # Pasar los encabezados con el token
+            # Pasar los encabezados con el token
+            **{'headers': headers}
         )
 
         # Parsear la respuesta de la Lambda
@@ -143,10 +144,11 @@ def get_account_by_id_from_profile(user_id, account_id, token):
             raise Exception("Account not found.")
 
         # Retornar el saldo de la cuenta
-        return account.get('saldo', 0)  # Si no tiene saldo, retorna 0
+        return float(account.get('saldo', 0))  # Retornar el saldo como float
 
     except Exception as e:
         raise Exception(f"Error fetching account balance: {str(e)}")
+
 
 
 def update_balance_in_profile(user_id, account_id, amount, token):
