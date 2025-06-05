@@ -10,7 +10,7 @@ provider:
   timeout: 29
   environment:
     TABLE_BANKACC: ${sls:stage}-profile-bank-accounts-table
-    TABLE_ALERTS: ${sls:stage}-profile-alerts-table
+    TABLE_ALERTS: ${sls:stage}-profile-alerts-table # ← ESTA LÍNEA
     STAGE: ${sls:stage}
     VALIDATE_TOKEN_FUNCTION: disdb-auth-api
 
@@ -46,7 +46,6 @@ functions:
           path: profile/bankacc/{cuenta_id}
           method: delete
           cors: true
-
   cuentasPorMoneda:
     handler: getAccountsByMoneda.lambda_handler
     events:
@@ -100,8 +99,8 @@ resources:
             AttributeType: S
           - AttributeName: moneda
             AttributeType: S
-          - AttributeName: amount
-            AttributeType: S 
+          - AttributeName: amount # <-- Added 'amount' attribute
+            AttributeType: S # Storing amount as a string
         KeySchema:
           - AttributeName: usuario_id
             KeyType: HASH
