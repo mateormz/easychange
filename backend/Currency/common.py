@@ -110,14 +110,9 @@ def get_account_balance_from_profile(user_id, account_id, token):
     Llama a la Lambda del servicio de perfil para obtener las cuentas bancarias del usuario
     y luego filtra la cuenta específica para obtener el saldo.
     """
-    function_name = f"easychange-profile-api-{os.environ['STAGE']}-listarCuentas"  # Función para listar las cuentas
+    function_name = f"{PROFILE_SERVICE_NAME}-{os.environ['STAGE']}-listarCuentas"  # Función para listar las cuentas
     payload = {
-        "body": json.dumps({"user_id": user_id})  # Pasamos el user_id para obtener las cuentas
-    }
-
-    # Asegúrate de pasar el token en los encabezados correctamente
-    headers = {
-        "Authorization": token  # Incluir el token en los encabezados
+        "body": json.dumps({"user_id": user_id, "account_id": account_id, "token": token})  # Pasamos el token dentro del cuerpo
     }
 
     try:
@@ -125,9 +120,7 @@ def get_account_balance_from_profile(user_id, account_id, token):
         response = lambda_client.invoke(
             FunctionName=function_name,
             InvocationType='RequestResponse',
-            Payload=json.dumps(payload),
-            # Pasar los encabezados con el token
-            **{'headers': headers}
+            Payload=json.dumps(payload)  # Pasamos solo el Payload aquí sin headers
         )
 
         # Parsear la respuesta de la Lambda
@@ -148,6 +141,7 @@ def get_account_balance_from_profile(user_id, account_id, token):
 
     except Exception as e:
         raise Exception(f"Error fetching account balance: {str(e)}")
+
 
 
 
