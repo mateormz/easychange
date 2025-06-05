@@ -1,10 +1,10 @@
-import boto3
 import hashlib
 import uuid
 from datetime import datetime, timedelta
 import os
-from boto3.dynamodb.conditions import Key
 import json
+from boto3.dynamodb.conditions import Key
+from singleton import get_dynamodb  # Importa la instancia Singleton de DynamoDB
 
 def hash_password(password):
     return hashlib.sha256(password.encode()).hexdigest()
@@ -13,10 +13,10 @@ def lambda_handler(event, context):
     try:
         print("[INFO] Received event:", json.dumps(event, indent=2))
 
-        # Initialize DynamoDB
-        dynamodb = boto3.resource('dynamodb')
+        # Obtener instancia Singleton de DynamoDB
+        dynamodb = get_dynamodb()
 
-        # Environment variables
+        # Variables de entorno
         try:
             user_table_name = os.environ['TABLE_USERS']
             token_table_name = os.environ['TABLE_TOKENS']
@@ -26,23 +26,19 @@ def lambda_handler(event, context):
             print(f"[ERROR] Missing environment variable: {str(env_error)}")
             return {
                 'statusCode': 500,
-                'headers': {
-                    'Content-Type': 'application/json'
-                },
+                'headers': {'Content-Type': 'application/json'},
                 'body': json.dumps({'error': f"Missing environment variable: {str(env_error)}"})
             }
 
         user_table = dynamodb.Table(user_table_name)
         token_table = dynamodb.Table(token_table_name)
 
-        # Parse request body
+        # Parsear cuerpo
         if 'body' not in event or not event['body']:
             print("[WARNING] Request body is missing")
             return {
                 'statusCode': 400,
-                'headers': {
-                    'Content-Type': 'application/json'
-                },
+                'headers': {'Content-Type': 'application/json'},
                 'body': json.dumps({'error': 'Request body is missing'})
             }
 
@@ -52,9 +48,7 @@ def lambda_handler(event, context):
             print(f"[ERROR] Failed to parse JSON body: {str(e)}")
             return {
                 'statusCode': 400,
-                'headers': {
-                    'Content-Type': 'application/json'
-                },
+                'headers': {'Content-Type': 'application/json'},
                 'body': json.dumps({'error': 'Invalid JSON in request body'})
             }
 
@@ -65,42 +59,32 @@ def lambda_handler(event, context):
         phoneNumber = body.get('phoneNumber')
         dni = body.get('dni')
 
-        print(f"[DEBUG] Parsed email: {email}")
-        print(f"[DEBUG] Parsed password: {password}")
-        print(f"[DEBUG] Parsed name: {name}")
-        print(f"[DEBUG] Parsed lastName: {lastName}")
-        print(f"[DEBUG] Parsed phoneNumber: {phoneNumber}")
-        print(f"[DEBUG] Parsed DNI: {dni}")
+        print(f"[DEBUG] Email: {email}, Name: {name}, LastName: {lastName}, Phone: {phoneNumber}, DNI: {dni}")
 
         if not all([email, password, name, lastName, phoneNumber, dni]):
             print("[WARNING] Missing required fields")
             return {
                 'statusCode': 400,
-                'headers': {
-                    'Content-Type': 'application/json'
-                },
+                'headers': {'Content-Type': 'application/json'},
                 'body': json.dumps({'error': 'Missing required fields'})
             }
 
-        # Check if the email is already registered
+        # Verificar si el email ya existe
         print(f"[INFO] Checking if email is already registered: {email}")
         response = user_table.query(
             IndexName=email_index,
             KeyConditionExpression=Key('email').eq(email)
         )
-        print(f"[DEBUG] Email query response: {response}")
 
         if response['Items']:
             print("[WARNING] Email is already registered")
             return {
                 'statusCode': 400,
-                'headers': {
-                    'Content-Type': 'application/json'
-                },
+                'headers': {'Content-Type': 'application/json'},
                 'body': json.dumps({'error': 'The email is already registered'})
             }
 
-        # Create the user
+        # Crear usuario
         user_id = str(uuid.uuid4())
         item = {
             'user_id': user_id,
@@ -113,15 +97,14 @@ def lambda_handler(event, context):
             'created_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         }
 
-        print(f"[INFO] Saving user to DynamoDB: {item}")
+        print(f"[INFO] Saving user: {item}")
         user_table.put_item(Item=item)
 
-        # Create a token
+        # Crear token
         token = str(uuid.uuid4())
         expiration = (datetime.now() + timedelta(hours=1)).strftime('%Y-%m-%d %H:%M:%S')
-        print(f"[INFO] Token generated: {token}, Expiration: {expiration}")
+        print(f"[INFO] Token generated: {token}")
 
-        print("[INFO] Storing token in DynamoDB")
         token_table.put_item(
             Item={
                 'token': token,
@@ -130,12 +113,9 @@ def lambda_handler(event, context):
             }
         )
 
-        print("[INFO] Returning successful response")
         return {
             'statusCode': 200,
-            'headers': {
-                'Content-Type': 'application/json'
-            },
+            'headers': {'Content-Type': 'application/json'},
             'body': json.dumps({
                 'token': token,
                 'expires': expiration,
@@ -147,8 +127,6 @@ def lambda_handler(event, context):
         print(f"[ERROR] Unexpected error: {str(e)}")
         return {
             'statusCode': 500,
-            'headers': {
-                'Content-Type': 'application/json'
-            },
+            'headers': {'Content-Type': 'application/json'},
             'body': json.dumps({'error': 'Internal Server Error', 'details': str(e)})
         }
