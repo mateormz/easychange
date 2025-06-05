@@ -9,7 +9,7 @@ provider:
   memorySize: 1024
   timeout: 29
   environment:
-    EXCHANGE_RATE_TABLE: ${sls:stage}-exchange-rate-table
+    EXCHANGE_RATE_TABLE: ${sls:stage}-admin-config-table  # Cambié el nombre aquí
     SERVICE_NAME: disdb-auth-api
     STAGE: ${sls:stage}
     VALIDATE_TOKEN_FUNCTION: validateToken
@@ -50,10 +50,10 @@ functions:
 
 resources:
   Resources:
-    ExchangeRateTable:
+    AdminConfigTable:  # Nombre de la tabla en DynamoDB
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: ${self:provider.environment.EXCHANGE_RATE_TABLE}
+        TableName: ${self:provider.environment.EXCHANGE_RATE_TABLE}  # Usando el nuevo nombre aquí
         AttributeDefinitions:
           - AttributeName: config_id
             AttributeType: S
