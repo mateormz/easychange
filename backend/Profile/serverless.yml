@@ -23,14 +23,14 @@ functions:
           method: post
           cors: true
 
+functions:
   listarCuentas:
     handler: listBankAccounts.lambda_handler
     events:
       - http:
-          path: profile/bankacc
+          path: profile/bankacc/{user_id}
           method: get
           cors: true
-
 
   actualizarCuenta:
     handler: updateBankAccount.lambda_handler
@@ -39,7 +39,6 @@ functions:
           path: profile/bankacc/{cuenta_id}
           method: put
           cors: true
-
 
   eliminarCuenta:
     handler: deleteBankAccount.lambda_handler

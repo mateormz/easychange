@@ -8,15 +8,14 @@ table = dynamodb.Table(table_name)
 
 def lambda_handler(event, context):
     try:
-        # Obtener el user_id desde los parámetros del query string
-        user_id = event.get("queryStringParameters", {}).get("user_id")
+        # Obtener user_id desde pathParameters
+        user_id = event.get("pathParameters", {}).get("user_id")
         if not user_id:
             return {
                 "statusCode": 400,
-                "body": json.dumps({"error": "Missing user_id in query parameters"})
+                "body": json.dumps({"error": "Missing user_id in path parameters"})
             }
 
-        # Consultar DynamoDB
         response = table.query(
             KeyConditionExpression=boto3.dynamodb.conditions.Key('usuario_id').eq(user_id)
         )
@@ -31,3 +30,5 @@ def lambda_handler(event, context):
             "statusCode": 500,
             "body": json.dumps({"error": str(e)})
         }
+
+
