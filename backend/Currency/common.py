@@ -126,8 +126,15 @@ def get_account_balance_from_profile(user_id, account_id, token):
         # Parsear la respuesta de la Lambda
         response_payload = json.loads(response['Payload'].read().decode())
 
-        # Verificar que la respuesta tenga cuentas
-        accounts = response_payload.get('body', [])
+        # Verificar que la respuesta tenga una clave 'body' y manejar correctamente los tipos de datos
+        body = response_payload.get('body', '{}')
+
+        # Si 'body' es una cadena, lo convertimos en un objeto JSON
+        if isinstance(body, str):
+            body = json.loads(body)
+
+        # Verificar que tenemos cuentas
+        accounts = body.get('Items', [])
         if not accounts:
             raise Exception("No accounts found for the user.")
 
@@ -141,6 +148,7 @@ def get_account_balance_from_profile(user_id, account_id, token):
 
     except Exception as e:
         raise Exception(f"Error fetching account balance: {str(e)}")
+
 
 
 
