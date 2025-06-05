@@ -43,7 +43,7 @@ def lambda_handler(event, context):
 
         # Obtener el saldo de las cuentas del usuario
         try:
-            # Modificar para pasar el token dentro del payload
+            # Obtener saldo de las cuentas de origen y destino
             from_balance = get_account_balance_from_profile(from_user_id, from_account_id, token)
             to_balance = get_account_balance_from_profile(to_user_id, to_account_id, token)
         except Exception as e:
@@ -70,7 +70,6 @@ def lambda_handler(event, context):
 
         # Actualizar el saldo de las cuentas (con transacciones ideales)
         try:
-            # Modificar para pasar el token dentro del payload
             update_balance_in_profile(from_user_id, from_account_id, -amount, token)
             update_balance_in_profile(to_user_id, to_account_id, converted_amount, token)
         except Exception as e:
