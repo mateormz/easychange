@@ -73,14 +73,16 @@ def lambda_handler(event, context):
                 'body': json.dumps({'error': f'Missing path parameter: {str(path_error)}'})
             }
 
-        # Check ownership
+        # Check ownership or if user is admin
         if user_id != authenticated_user_id:
-            print("[WARNING] User is attempting to delete unauthorized resource")
-            return {
-                'statusCode': 403,
-                'headers': {'Content-Type': 'application/json'},
-                'body': json.dumps({'error': 'Unauthorized - You can only delete your own account'})
-            }
+            print("[INFO] Checking if user is admin")
+            if user_info.get('role') != 'admin':
+                print("[WARNING] User is attempting to delete unauthorized resource")
+                return {
+                    'statusCode': 403,
+                    'headers': {'Content-Type': 'application/json'},
+                    'body': json.dumps({'error': 'Unauthorized - You can only delete your own account unless you are an admin'})
+                }
 
         # Check if user exists
         print(f"[INFO] Checking if user exists: user_id={user_id}")

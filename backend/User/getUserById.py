@@ -22,7 +22,10 @@ def lambda_handler(event, context):
 
         user_table = dynamodb.Table(user_table_name)
 
-        token = event.get('headers', {}).get('Authorization')
+        # Obtener el token desde el cuerpo de la solicitud
+        body = json.loads(event.get('body', '{}'))  # Asegurarse de parsear el cuerpo correctamente
+        token = body.get('token')
+
         if not token:
             return {
                 'statusCode': 400,
@@ -30,6 +33,7 @@ def lambda_handler(event, context):
                 'body': json.dumps({'error': 'Authorization token is missing'})
             }
 
+        # Realizar la validación del token
         payload = {"body": json.dumps({"token": token})}
         validate_response = lambda_client.invoke(
             FunctionName=validate_function_name,
@@ -73,7 +77,11 @@ def lambda_handler(event, context):
             }
 
         user = response['Item']
-        user.pop('password_hash', None)
+        user.pop('password_hash', None)  # Remove sensitive info
+
+        # Aquí se añade el rol del usuario
+        user_role = user.get('role', 'user')  # Default to 'user' if no role exists
+        user['role'] = user_role  # Add role to the response
 
         return {
             'statusCode': 200,

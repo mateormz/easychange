@@ -92,6 +92,8 @@ resources:
             AttributeType: S
           - AttributeName: email
             AttributeType: S
+          - AttributeName: role
+            AttributeType: S  # Añadimos el campo 'role' para el rol de usuario
         KeySchema:
           - AttributeName: user_id
             KeyType: HASH
