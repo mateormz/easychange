@@ -1,3 +1,4 @@
+
 org: ${env:SLS_ORG}
 service: exchange-rate-api
 
@@ -5,7 +6,9 @@ provider:
   name: aws
   runtime: python3.12
   iam:
-    role: ${env:AWS_ROLE_ARN}   # Quité managedPolicyArns porque no es válido junto con 'role'
+    role: ${env:AWS_ROLE_ARN}
+    managedPolicyArns:
+      - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
   memorySize: 1024
   timeout: 29
   environment:
@@ -22,7 +25,7 @@ plugins:
 
 custom:
   pythonRequirements:
-    dockerizePip: false   # Cambia a true si tienes espacio y quieres usar Docker
+    dockerizePip: true
 
 functions:
   createExchangeRates:

@@ -1,8 +1,10 @@
+
 import boto3
 import os
 import json
 import uuid
-from commonExchange import validate_token_and_get_user,fetch_rates_for_source,save_rates_to_db
+from commonExchange import validate_token_and_get_user, save_rates_to_db
+from commonExchange import ExchangeRateAPI, DynamoDBConnection  # Importa los Singleton
 
 def lambda_handler(event, context):
     try:
@@ -13,7 +15,14 @@ def lambda_handler(event, context):
         if not source:
             return respond(400, {'error': 'Missing "from" currency in body'})
 
-        quotes, timestamp = fetch_rates_for_source(source.upper())
+        # Usa ExchangeRateAPI Singleton para consultar la API externa
+        exchange_api = ExchangeRateAPI()
+        quotes, timestamp = exchange_api.fetch_rates_for_source(source.upper())
+
+        # Usa DynamoDBConnection Singleton para obtener la referencia a la tabla
+        db_connection = DynamoDBConnection()
+        table = db_connection.get_table()
+
         save_rates_to_db(quotes, timestamp)
 
         return respond(201, {

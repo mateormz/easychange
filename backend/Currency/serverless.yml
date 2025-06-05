@@ -3,7 +3,7 @@ service: currency-conversion-api
 
 provider:
   name: aws
-  runtime: python3.9
+  runtime: python3.12
   iam:
     role: ${env:AWS_ROLE_ARN}
     managedPolicyArns:

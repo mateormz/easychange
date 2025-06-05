@@ -1,5 +1,6 @@
 import json
-from commonExchange import validate_token_and_get_user, fetch_rates_for_source, save_rates_to_db
+from commonExchange import validate_token_and_get_user, save_rates_to_db
+from commonExchange import ExchangeRateAPI, DynamoDBConnection  # Importa los Singleton
 
 def lambda_handler(event, context):
     try:
@@ -15,9 +16,14 @@ def lambda_handler(event, context):
         from_currency = from_currency.upper()
 
         # Obtener todas las tasas desde la API externa
-        quotes, timestamp = fetch_rates_for_source(from_currency)
+        exchange_api = ExchangeRateAPI()  # Usa el Singleton para la API
+        quotes, timestamp = exchange_api.fetch_rates_for_source(from_currency)
 
-        # Guardar en DynamoDB (borrando las anteriores y agregando las nuevas)
+        # Usar el Singleton para la conexión a DynamoDB
+        db_connection = DynamoDBConnection()  # Obtienes la misma instancia
+        table = db_connection.get_table()
+
+        # Guardar tasas en la base de datos
         save_rates_to_db(quotes, timestamp)
 
         return respond(200, {
