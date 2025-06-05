@@ -1,6 +1,7 @@
 import boto3
 import json
 import uuid
+import os
 from datetime import datetime
 from common import validate_token_and_get_user
 

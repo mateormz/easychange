@@ -1,5 +1,6 @@
 import boto3
 import json
+import os
 from common import validate_token_and_get_user
 
 def lambda_handler(event, context):
