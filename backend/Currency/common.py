@@ -9,7 +9,6 @@ dynamodb = boto3.resource('dynamodb')
 lambda_client = boto3.client('lambda')
 
 # Variables de entorno
-API_KEY = os.environ['EXCHANGE_API_ACCESS_KEY']
 EXCHANGE_SERVICE_NAME = os.environ['EXCHANGE_SERVICE_NAME']
 PROFILE_SERVICE_NAME = os.environ['PROFILE_SERVICE_NAME']
 
