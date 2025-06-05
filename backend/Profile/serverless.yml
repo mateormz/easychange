@@ -100,8 +100,7 @@ resources:
             AttributeType: S
           - AttributeName: moneda
             AttributeType: S
-          - AttributeName: saldo  # Agregado el atributo saldo
-            AttributeType: S  # Se asume que saldo es un string, como los demás atributos.
+          - AttributeName: saldo  # Solo como atributo adicional, no parte del KeySchema
         KeySchema:
           - AttributeName: usuario_id
             KeyType: HASH
