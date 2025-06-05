@@ -112,6 +112,8 @@ import logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger()
 
+lambda_client = boto3.client('lambda')
+
 
 def get_account_balance_from_profile(user_id, account_id, token):
     """
@@ -135,7 +137,8 @@ def get_account_balance_from_profile(user_id, account_id, token):
 
     try:
         # Invocar la Lambda de cuentas
-        logger.info(f"Invocando Lambda para obtener cuentas con token: {token[:10]}...")  # Log del token (solo los primeros 10 caracteres por seguridad)
+        logger.info(
+            f"Invocando Lambda para obtener cuentas con token: {token[:10]}...")  # Log del token (solo los primeros 10 caracteres por seguridad)
         response = lambda_client.invoke(
             FunctionName=function_name,
             InvocationType='RequestResponse',
@@ -153,8 +156,10 @@ def get_account_balance_from_profile(user_id, account_id, token):
         body = response_payload.get('body', [])
         logger.info(f"Cuentas obtenidas: {json.dumps(body)}")  # Log de las cuentas obtenidas
 
+        # Si la respuesta es una cadena, convertirla a un diccionario
         if isinstance(body, str):
-            body = json.loads(body)  # Si es cadena, convertirla a JSON
+            body = json.loads(body)
+            logger.info(f"Respuesta convertida a JSON: {json.dumps(body)}")  # Log de la conversión
 
         # Verificar que tenemos cuentas
         if not body:
