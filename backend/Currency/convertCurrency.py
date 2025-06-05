@@ -28,7 +28,8 @@ def lambda_handler(event, context):
         to_currency = to_currency.upper()
 
         # Llamada a la función Lambda para obtener la tasa de cambio
-        rate = float(fetch_rate_for_pair_from_exchange(from_currency, to_currency))
+        # Ahora pasamos el token en los encabezados de la invocación
+        rate = float(fetch_rate_for_pair_from_exchange(from_currency, to_currency, token))
 
         # Calcular la cantidad convertida
         converted_amount = float(amount) * rate

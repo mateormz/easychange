@@ -66,11 +66,10 @@ def validate_token_and_get_user(event):
         }
 
 
-def fetch_rate_for_pair_from_exchange(source, target):
+def fetch_rate_for_pair_from_exchange(source, target, token):
     """
     Llama a la función Lambda del servicio de cambio de divisas para obtener la tasa de cambio entre dos monedas.
     """
-    # Usamos el nuevo nombre de la función Lambda 'exchange-rate-api-dev-consultConversion'
     function_name = f"exchange-rate-api-{os.environ['STAGE']}-consultConversion"  # Nombre de la función Lambda que consulta las tasas
     payload = {
         "pathParameters": {
@@ -79,23 +78,23 @@ def fetch_rate_for_pair_from_exchange(source, target):
         }
     }
 
-    print(
-        f"Invocando Lambda para obtener tasa de cambio: {function_name} con payload: {payload}")  # Registro para depuración
+    headers = {
+        'Authorization': token  # Agregar el token a los encabezados
+    }
 
     try:
         # Invocar la función Lambda que devuelve la tasa de cambio
         response = lambda_client.invoke(
             FunctionName=function_name,
             InvocationType='RequestResponse',  # Llamada síncrona
-            Payload=json.dumps(payload)
+            Payload=json.dumps(payload),
+            # Pasar los encabezados en la invocación
+            **{'headers': headers}
         )
 
         # Leer la respuesta
         response_payload = json.loads(response['Payload'].read().decode())
 
-        print(f"Respuesta de Lambda para tasa de cambio: {response_payload}")  # Registro para depuración
-
-        # Verificar si la respuesta tiene una tasa de cambio válida
         if response_payload.get('statusCode') != 200:
             raise Exception(f"Error al obtener la tasa de cambio: {response_payload.get('body')}")
 
@@ -107,8 +106,9 @@ def fetch_rate_for_pair_from_exchange(source, target):
         return str(data["rate"])
 
     except Exception as e:
-        print(f"Error al obtener la tasa de cambio: {str(e)}")  # Registro para depuración
         raise Exception(f"Failed to fetch exchange rate via Lambda: {str(e)}")
+
+
 
 
 def get_account_by_id_from_profile(user_id, account_id):
