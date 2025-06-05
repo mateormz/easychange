@@ -87,36 +87,33 @@ functions:
           cors: true
 
 
-resources:
-  Resources:
-    BankAccountsTable:
-      Type: AWS::DynamoDB::Table
-      Properties:
-        TableName: ${self:provider.environment.TABLE_BANKACC}
-        AttributeDefinitions:
-          - AttributeName: usuario_id
-            AttributeType: S
-          - AttributeName: cuenta_id
-            AttributeType: S
-          - AttributeName: moneda
-            AttributeType: S
-          - AttributeName: saldo  # Asegúrate de que saldo esté en AttributeDefinitions como string
-            AttributeType: S  # Se asume que saldo es un string
+BankAccountsTable:
+  Type: AWS::DynamoDB::Table
+  Properties:
+    TableName: ${self:provider.environment.TABLE_BANKACC}
+    AttributeDefinitions:
+      - AttributeName: usuario_id
+        AttributeType: S
+      - AttributeName: cuenta_id
+        AttributeType: S
+      - AttributeName: moneda
+        AttributeType: S
+    KeySchema:
+      - AttributeName: usuario_id
+        KeyType: HASH
+      - AttributeName: cuenta_id
+        KeyType: RANGE
+    GlobalSecondaryIndexes:
+      - IndexName: moneda-index
         KeySchema:
-          - AttributeName: usuario_id
+          - AttributeName: moneda
             KeyType: HASH
-          - AttributeName: cuenta_id
-            KeyType: RANGE
-        GlobalSecondaryIndexes:
-          - IndexName: moneda-index
-            KeySchema:
-              - AttributeName: moneda
-                KeyType: HASH
-            Projection:
-              ProjectionType: ALL
-        BillingMode: PAY_PER_REQUEST
-        PointInTimeRecoverySpecification:
-          PointInTimeRecoveryEnabled: true
+        Projection:
+          ProjectionType: ALL
+    BillingMode: PAY_PER_REQUEST
+    PointInTimeRecoverySpecification:
+      PointInTimeRecoveryEnabled: true
+
 
     AlertsTable:
       Type: AWS::DynamoDB::Table
