@@ -3,18 +3,14 @@ import os
 import json
 import time
 import urllib.request
-import urllib.parse
 
-# Inicializa recursos
+# Recursos globales
 dynamodb = boto3.resource('dynamodb')
-rates_table = dynamodb.Table(os.environ['RATES_TABLE'])
-accounts_table = dynamodb.Table(os.environ["TABLE_BANKACC"])
 lambda_client = boto3.client('lambda')
 
 # Variables de entorno
 API_URL = os.environ['EXTERNAL_API_URL']
 API_KEY = os.environ['EXCHANGE_API_ACCESS_KEY']
-CACHE_TTL = int(os.environ.get('CACHE_TTL_SECONDS', 3600))
 EXCHANGE_SERVICE_NAME = os.environ['EXCHANGE_SERVICE_NAME']
 PROFILE_SERVICE_NAME = os.environ['PROFILE_SERVICE_NAME']
 
@@ -40,26 +36,15 @@ def validate_token_and_get_user(event):
     return user_info.get('user_id')
 
 
-# API EXCHANGE functions
 def fetch_rate_for_pair_from_exchange(source, target):
-    params = {
-        'access_key': API_KEY,
-        'source': source,
-        'currencies': target
-    }
-    url = f"{API_URL}/live?" + urllib.parse.urlencode(params)
+    url = f"{API_URL}/convert?from={source}&to={target}&amount=1"
     with urllib.request.urlopen(url) as response:
         data = json.loads(response.read().decode())
-    if not data.get('success'):
-        raise Exception(f"API error: {data}")
-    quotes = data['quotes']
-    key = source + target
-    if key not in quotes:
+    if not data.get('info') or 'rate' not in data['info']:
         raise Exception(f"Rate not found for {source}->{target}")
-    return str(quotes[key]), data['timestamp']
+    return str(data['info']['rate']), int(time.time())
 
 
-# API PROFILE functions
 def get_account_by_id_from_profile(user_id, account_id):
     function_name = f"{PROFILE_SERVICE_NAME}-{os.environ['STAGE']}-listBankAccounts"
     payload = {"body": json.dumps({"user_id": user_id, "account_id": account_id})}
