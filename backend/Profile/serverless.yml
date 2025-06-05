@@ -23,7 +23,6 @@ functions:
           method: post
           cors: true
 
-functions:
   listarCuentas:
     handler: listBankAccounts.lambda_handler
     events:
