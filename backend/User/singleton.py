@@ -1,22 +1,20 @@
 import boto3
 
-_dynamodb_resource = None
-_lambda_client = None
+class DynamoDBSingleton:
+    _instance = None
+
+    def __new__(cls):
+        if cls._instance is None:
+            print("[INFO] Creando nueva instancia de DynamoDB")
+            cls._instance = super(DynamoDBSingleton, cls).__new__(cls)
+            cls._instance.resource = boto3.resource("dynamodb")
+        else:
+            print("[INFO] Reutilizando instancia de DynamoDB")
+        return cls._instance
+
+    def get_resource(self):
+        return self.resource
+
 
 def get_dynamodb():
-    global _dynamodb_resource
-    if _dynamodb_resource is None:
-        print("[INFO] Creando nueva instancia de DynamoDB")
-        _dynamodb_resource = boto3.resource("dynamodb")
-    else:
-        print("[INFO] Reutilizando instancia de DynamoDB")
-    return _dynamodb_resource
-
-def get_lambda_client():
-    global _lambda_client
-    if _lambda_client is None:
-        print("[INFO] Creando nueva instancia de Lambda client")
-        _lambda_client = boto3.client("lambda")
-    else:
-        print("[INFO] Reutilizando instancia de Lambda client")
-    return _lambda_client
+    return DynamoDBSingleton().get_resource()

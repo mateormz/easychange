@@ -1,6 +1,6 @@
 import os
 import json
-from singleton import get_dynamodb, get_lambda_client  # Importa el Singleton
+from singleton import get_dynamodb, get_lambda_client
 
 def lambda_handler(event, context):
     try:
@@ -9,7 +9,6 @@ def lambda_handler(event, context):
         dynamodb = get_dynamodb()
         lambda_client = get_lambda_client()
 
-        # Load environment variables
         try:
             user_table_name = os.environ['TABLE_USERS']
             validate_function_name = f"{os.environ['SERVICE_NAME']}-{os.environ['STAGE']}-{os.environ['VALIDATE_TOKEN_FUNCTION']}"
@@ -23,7 +22,6 @@ def lambda_handler(event, context):
 
         user_table = dynamodb.Table(user_table_name)
 
-        # Token
         token = event.get('headers', {}).get('Authorization')
         if not token:
             return {
@@ -32,7 +30,6 @@ def lambda_handler(event, context):
                 'body': json.dumps({'error': 'Authorization token is missing'})
             }
 
-        # Validate token
         payload = {"body": json.dumps({"token": token})}
         validate_response = lambda_client.invoke(
             FunctionName=validate_function_name,
@@ -51,7 +48,6 @@ def lambda_handler(event, context):
         user_info = json.loads(validation_result.get('body', '{}'))
         authenticated_user_id = user_info.get('user_id')
 
-        # Get path parameter
         try:
             user_id = event['pathParameters']['user_id']
         except KeyError as path_error:
@@ -68,7 +64,6 @@ def lambda_handler(event, context):
                 'body': json.dumps({'error': 'Unauthorized - You can only access your own account'})
             }
 
-        # Get user
         response = user_table.get_item(Key={'user_id': user_id})
         if 'Item' not in response:
             return {
