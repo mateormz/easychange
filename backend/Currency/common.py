@@ -1,15 +1,14 @@
 import boto3
 import os
 import json
-import time
 import urllib.request
+import urllib.error
 
 # Recursos globales
 dynamodb = boto3.resource('dynamodb')
 lambda_client = boto3.client('lambda')
 
 # Variables de entorno
-API_URL = os.environ['EXTERNAL_API_URL']
 API_KEY = os.environ['EXCHANGE_API_ACCESS_KEY']
 EXCHANGE_SERVICE_NAME = os.environ['EXCHANGE_SERVICE_NAME']
 PROFILE_SERVICE_NAME = os.environ['PROFILE_SERVICE_NAME']
@@ -37,12 +36,23 @@ def validate_token_and_get_user(event):
 
 
 def fetch_rate_for_pair_from_exchange(source, target):
-    url = f"{API_URL}/convert?from={source}&to={target}&amount=1"
-    with urllib.request.urlopen(url) as response:
-        data = json.loads(response.read().decode())
-    if not data.get('info') or 'rate' not in data['info']:
-        raise Exception(f"Rate not found for {source}->{target}")
-    return str(data['info']['rate']), int(time.time())
+    exchange_base_url = os.environ['EXCHANGE_API_URL']  # Este valor ya incluye /dev si usas ImportValue correctamente
+    url = f"{exchange_base_url}/exchange-rate/{source}/{target}"
+
+    try:
+        req = urllib.request.Request(url)
+        with urllib.request.urlopen(req) as response:
+            data = json.loads(response.read().decode())
+
+        if "rate" not in data:
+            raise Exception(f"Rate not found in response from Exchange API for {source}->{target}")
+
+        return str(data["rate"])
+
+    except urllib.error.HTTPError as e:
+        raise Exception(f"Exchange API error {e.code}: {e.read().decode()}")
+    except Exception as e:
+        raise Exception(f"Failed to fetch exchange rate: {str(e)}")
 
 
 def get_account_by_id_from_profile(user_id, account_id):

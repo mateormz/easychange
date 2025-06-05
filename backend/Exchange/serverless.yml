@@ -90,3 +90,11 @@ resources:
         TimeToLiveSpecification:
           AttributeName: ttl
           Enabled: true
+
+outputs:
+  ExchangeApiBaseUrl:
+    value:
+      Fn::Sub: https://${ApiGatewayRestApi}.execute-api.${AWS::Region}.amazonaws.com/${sls:stage}
+    export:
+      name: ExchangeApiBaseUrl-${sls:stage}
+

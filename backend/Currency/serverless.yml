@@ -15,7 +15,8 @@ provider:
   environment:
     USER_CONVERSIONS_TABLE: ${self:provider.stage}-user-conversions
     USER_REPORTS_TABLE: ${self:provider.stage}-user-reports
-    EXTERNAL_API_URL: https://api.exchangerate.host
+    EXCHANGE_API_URL:
+      Fn::ImportValue: ExchangeApiBaseUrl-${self:provider.stage}
     EXCHANGE_API_ACCESS_KEY: your-access-key-here
     PROFILE_SERVICE_NAME: easychange-profile-api
     EXCHANGE_SERVICE_NAME: exchange-rate-api
@@ -23,6 +24,7 @@ provider:
     SERVICE_NAME: disdb-auth-api
     STAGE: ${self:provider.stage}
     VALIDATE_TOKEN_FUNCTION: validateToken
+
 
 functions:
   convertCurrency:
