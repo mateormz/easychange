@@ -100,7 +100,8 @@ resources:
             AttributeType: S
           - AttributeName: moneda
             AttributeType: S
-          - AttributeName: saldo  # Solo como atributo adicional, no parte del KeySchema
+          - AttributeName: saldo  # Asegúrate de que saldo esté en AttributeDefinitions como string
+            AttributeType: S  # Se asume que saldo es un string
         KeySchema:
           - AttributeName: usuario_id
             KeyType: HASH
