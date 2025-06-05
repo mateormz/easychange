@@ -58,8 +58,9 @@ def lambda_handler(event, context):
         lastName = body.get('lastName')
         phoneNumber = body.get('phoneNumber')
         dni = body.get('dni')
+        role = body.get('role', 'user')  # Añadido campo de rol
 
-        print(f"[DEBUG] Email: {email}, Name: {name}, LastName: {lastName}, Phone: {phoneNumber}, DNI: {dni}")
+        print(f"[DEBUG] Email: {email}, Name: {name}, LastName: {lastName}, Phone: {phoneNumber}, DNI: {dni}, Role: {role}")
 
         if not all([email, password, name, lastName, phoneNumber, dni]):
             print("[WARNING] Missing required fields")
@@ -94,7 +95,8 @@ def lambda_handler(event, context):
             'lastName': lastName,
             'phoneNumber': phoneNumber,
             'dni': dni,
-            'created_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            'created_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+            'role': role  # Se guarda el rol
         }
 
         print(f"[INFO] Saving user: {item}")

@@ -74,14 +74,16 @@ def lambda_handler(event, context):
                 'body': json.dumps({'error': f'Missing path parameter: {str(path_error)}'})
             }
 
-        # Verificación de autorización
+        # Verificación de autorización (un usuario puede actualizar solo su propia cuenta, o si es admin, puede actualizar cualquier cuenta)
         if user_id != authenticated_user_id:
-            print("[WARNING] User is attempting to update unauthorized resources")
-            return {
-                'statusCode': 403,
-                'headers': {'Content-Type': 'application/json'},
-                'body': json.dumps({'error': 'Unauthorized - You can only update your own account'})
-            }
+            print("[INFO] Checking if user is admin")
+            if user_info.get('role') != 'admin':
+                print("[WARNING] User is attempting to update unauthorized resource")
+                return {
+                    'statusCode': 403,
+                    'headers': {'Content-Type': 'application/json'},
+                    'body': json.dumps({'error': 'Unauthorized - You can only update your own account unless you are an admin'})
+                }
 
         # Verificar existencia del usuario
         print(f"[INFO] Checking if user exists: user_id={user_id}")
