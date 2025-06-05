@@ -59,6 +59,8 @@ class ExchangeRateAPI:
             data = json.loads(response.read().decode())
         if not data.get('success'):
             raise Exception(f"API error: {data}")
+        if 'quotes' not in data:
+            raise Exception("No exchange rates found in the API response.")
         return data['quotes'], data['timestamp']
 
 
