@@ -3,7 +3,7 @@ service: exchange-rate-api
 
 provider:
   name: aws
-  runtime: python3.9
+  runtime: python3.12
   iam:
     role: ${env:AWS_ROLE_ARN}   # Quité managedPolicyArns porque no es válido junto con 'role'
   memorySize: 1024
