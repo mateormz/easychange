@@ -10,19 +10,18 @@ provider:
   timeout: 29
 
   iam:
-    role: ${env:AWS_ROLE_ARN}
+    role: ${env:AWS_ROLE_ARN}  # Asegúrate de que el rol tiene los permisos correctos
 
   environment:
     USER_CONVERSIONS_TABLE: ${self:provider.stage}-user-conversions
     USER_REPORTS_TABLE: ${self:provider.stage}-user-reports
-    EXCHANGE_API_URL: https://uy586ziqy9.execute-api.us-east-1.amazonaws.com #2
-    EXCHANGE_API_ACCESS_KEY: your-access-key-here
     PROFILE_SERVICE_NAME: easychange-profile-api
-    EXCHANGE_SERVICE_NAME: exchange-rate-api
+    EXCHANGE_SERVICE_NAME: dev-exchange-rate-api  # Asegúrate de que esté definido correctamente
     CACHE_TTL_SECONDS: 3600
     SERVICE_NAME: disdb-auth-api
     STAGE: ${self:provider.stage}
     VALIDATE_TOKEN_FUNCTION: validateToken
+    # Eliminamos EXCHANGE_API_URL y EXCHANGE_API_ACCESS_KEY, ya que ahora usamos Lambda
 
 functions:
   convertCurrency:
@@ -63,6 +62,15 @@ functions:
       - http:
           path: transferCurrency
           method: post
+          cors: true
+
+  # Agregamos la nueva función Lambda para obtener la tasa de cambio
+  getExchangeRate:
+    handler: exchangeRate.lambda_handler  # Este debe ser el nombre del archivo y la función Lambda
+    events:
+      - http:
+          path: /exchange-rate/{from}/{to}
+          method: get
           cors: true
 
 resources:
