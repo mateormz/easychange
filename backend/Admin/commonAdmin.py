@@ -44,4 +44,41 @@ def validate_token_and_get_user(event):
         raise Exception("Unauthorized - Invalid or expired token")
 
     user_info = json.loads(validation_result.get('body', '{}'))
-    return user_info.get('user_id')
+    return user_info.get('user_id'), token
+
+
+# Función para obtener el rol del usuario usando su user_id
+def get_user_role_by_user_id(user_id, token):
+    """
+    Invoca la función getUserById de la API de usuario para obtener el rol del usuario, 
+    incluyendo el token en los headers para autenticar la invocación.
+    """
+    lambda_client = boto3.client('lambda')
+    user_function_name = f"{os.environ['USER_SERVICE_NAME']}-{os.environ['STAGE']}-getUserById"  # Reemplaza con el nombre real de la función de la API de usuario
+
+    payload = {
+        'pathParameters': {
+            'user_id': user_id
+        }
+    }
+
+    # Configurar los encabezados con el token
+    headers = {
+        'Authorization': token
+    }
+
+    # Invoca la función Lambda getUserById, pasando los encabezados con el token
+    response = lambda_client.invoke(
+        FunctionName=user_function_name,
+        InvocationType='RequestResponse',
+        Payload=json.dumps(payload),
+        Headers=headers  # Pasamos el token en los headers
+    )
+
+    user_info = json.loads(response['Payload'].read())
+
+    if user_info.get('statusCode') == 200:
+        user_data = json.loads(user_info.get('body'))
+        return user_data.get('role', 'user')  # Default to 'user' if no role exists
+    else:
+        raise Exception("User not found or unable to fetch user info")

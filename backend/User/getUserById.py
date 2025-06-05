@@ -73,7 +73,11 @@ def lambda_handler(event, context):
             }
 
         user = response['Item']
-        user.pop('password_hash', None)
+        user.pop('password_hash', None)  # Remove sensitive info
+
+        # Aquí se añade el rol del usuario
+        user_role = user.get('role', 'user')  # Default to 'user' if no role exists
+        user['role'] = user_role  # Add role to the response
 
         return {
             'statusCode': 200,
