@@ -100,6 +100,8 @@ resources:
             AttributeType: S
           - AttributeName: moneda
             AttributeType: S
+          - AttributeName: saldo  # Agregado el atributo saldo
+            AttributeType: S  # Se asume que saldo es un string, como los demás atributos.
         KeySchema:
           - AttributeName: usuario_id
             KeyType: HASH
@@ -142,4 +144,3 @@ resources:
         BillingMode: PAY_PER_REQUEST
         PointInTimeRecoverySpecification:
           PointInTimeRecoveryEnabled: true
-
