@@ -51,7 +51,7 @@ def validate_token_and_get_user(event):
 def get_user_role_by_user_id(user_id, token):
     """
     Invoca la función getUserById de la API de usuario para obtener el rol del usuario, 
-    incluyendo el token en los headers para autenticar la invocación.
+    incluyendo el token en el cuerpo (payload) para autenticar la invocación.
     """
     lambda_client = boto3.client('lambda')
     user_function_name = f"{os.environ['USER_SERVICE_NAME']}-{os.environ['STAGE']}-getUserById"  # Reemplaza con el nombre real de la función de la API de usuario
@@ -59,20 +59,17 @@ def get_user_role_by_user_id(user_id, token):
     payload = {
         'pathParameters': {
             'user_id': user_id
+        },
+        'headers': {
+            'Authorization': token  # Pasamos el token aquí en el payload
         }
     }
 
-    # Configurar los encabezados con el token
-    headers = {
-        'Authorization': token
-    }
-
-    # Invoca la función Lambda getUserById, pasando los encabezados con el token
+    # Invoca la función Lambda getUserById, pasando el token en el cuerpo (payload)
     response = lambda_client.invoke(
         FunctionName=user_function_name,
         InvocationType='RequestResponse',
-        Payload=json.dumps(payload),
-        Headers=headers  # Pasamos el token en los headers
+        Payload=json.dumps(payload)  # Token está en el cuerpo
     )
 
     user_info = json.loads(response['Payload'].read())
