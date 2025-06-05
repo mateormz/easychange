@@ -1,5 +1,5 @@
 import json
-from commonExchange import validate_token_and_get_user, fetch_rates_for_source, save_rates_to_db
+from commonExchange import validate_token_and_get_user, save_rates_to_db
 from commonExchange import ExchangeRateAPI, DynamoDBConnection  # Importa los Singleton
 
 def lambda_handler(event, context):

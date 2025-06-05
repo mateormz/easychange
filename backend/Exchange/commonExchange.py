@@ -14,6 +14,9 @@ class ExchangeRateAPI:
             cls._instance = super(ExchangeRateAPI, cls).__new__(cls)
             cls._instance.api_url = os.environ['EXTERNAL_API_URL']
             cls._instance.api_key = os.environ['EXCHANGE_API_ACCESS_KEY']
+            print("[INFO] Creando nueva instancia de ExchangeRateAPI")
+        else:
+            print("[INFO] Reutilizando la instancia de ExchangeRateAPI")
         return cls._instance
 
     def get_api_url(self):
@@ -68,6 +71,9 @@ class DynamoDBConnection:
             cls._instance = super(DynamoDBConnection, cls).__new__(cls)
             cls._instance.dynamodb = boto3.resource('dynamodb')
             cls._instance.table = cls._instance.dynamodb.Table(os.environ['RATES_TABLE'])
+            print("[INFO] Creando nueva instancia de DynamoDB")
+        else:
+            print("[INFO] Reutilizando la instancia de DynamoDB")
         return cls._instance
 
     def get_table(self):
