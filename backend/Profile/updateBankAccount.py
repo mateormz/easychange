@@ -1,14 +1,20 @@
 import boto3
 import os
 import json
-from common import validate_token_and_get_user
 
 dynamodb = boto3.resource('dynamodb')
 table = dynamodb.Table(os.environ["TABLE_BANKACC"])
 
 def lambda_handler(event, context):
     try:
-        user_id = validate_token_and_get_user(event)
+        # Obtener user_id desde los parámetros del query string
+        user_id = event.get("queryStringParameters", {}).get("user_id")
+        if not user_id:
+            return {
+                "statusCode": 400,
+                "body": json.dumps({"error": "Missing user_id in query parameters"})
+            }
+
         cuenta_id = event['pathParameters']['cuenta_id']
         body = json.loads(event.get('body', '{}'))
 
@@ -18,9 +24,9 @@ def lambda_handler(event, context):
                 'body': json.dumps({'error': 'Request body is missing'})
             }
 
-        # Asegurarse de que el saldo siempre sea un string, incluso si no está presente en el body
+        # Convertir saldo a string si existe
         if 'saldo' in body:
-            body['saldo'] = str(body['saldo'])  # Convertir saldo a string
+            body['saldo'] = str(body['saldo'])
 
         update_expression = "SET " + ", ".join(f"#{k} = :{k}" for k in body)
         expression_attribute_names = {f"#{k}": k for k in body}
