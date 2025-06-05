@@ -43,7 +43,8 @@ def fetch_rate_for_pair_from_exchange(source, target):
     """
     Llama a la función Lambda del servicio de cambio de divisas para obtener la tasa de cambio entre dos monedas.
     """
-    function_name = f"{EXCHANGE_SERVICE_NAME}-{os.environ['STAGE']}-getExchangeRate"  # Nombre de la función Lambda que consulta las tasas
+    # Usamos el nuevo nombre de la función Lambda 'exchange-rate-api-dev-consultConversion'
+    function_name = f"exchange-rate-api-{os.environ['STAGE']}-consultConversion"  # Nombre de la función Lambda que consulta las tasas
     payload = {
         "pathParameters": {
             "from": source,
