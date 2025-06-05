@@ -99,13 +99,11 @@ resources:
             AttributeType: S
           - AttributeName: moneda
             AttributeType: S
-          - AttributeName: amount # <-- Added 'amount' attribute
-            AttributeType: S # Storing amount as a string
         KeySchema:
           - AttributeName: usuario_id
-            KeyType: HASH
+            KeyType: HASH # Partition key
           - AttributeName: cuenta_id
-            KeyType: RANGE
+            KeyType: RANGE # Sort key
         GlobalSecondaryIndexes:
           - IndexName: moneda-index
             KeySchema:
