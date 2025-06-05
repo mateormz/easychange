@@ -105,14 +105,19 @@ def fetch_rate_for_pair_from_exchange(source, target, token):
         raise Exception(f"Failed to fetch exchange rate via Lambda: {str(e)}")
 
 
-def get_account_by_id_from_profile(user_id, account_id):
+def get_account_by_id_from_profile(user_id, account_id, token):
     """
     Llama a la Lambda del servicio de perfil para obtener las cuentas bancarias de un usuario
     y luego filtra la cuenta con el account_id correspondiente.
     """
     function_name = f"{PROFILE_SERVICE_NAME}-{os.environ['STAGE']}-listarCuentas"
+
     payload = {
-        "body": json.dumps({"user_id": user_id})
+        "body": json.dumps({"user_id": user_id})  # Pasamos el user_id para obtener las cuentas
+    }
+
+    headers = {
+        "Authorization": token  # Agregar el token en los encabezados
     }
 
     try:
@@ -120,7 +125,8 @@ def get_account_by_id_from_profile(user_id, account_id):
         response = lambda_client.invoke(
             FunctionName=function_name,
             InvocationType='RequestResponse',
-            Payload=json.dumps(payload)
+            Payload=json.dumps(payload),
+            **{'headers': headers}  # Pasar los encabezados con el token
         )
 
         # Parsear la respuesta de la Lambda

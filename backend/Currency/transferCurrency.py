@@ -5,7 +5,7 @@ from datetime import datetime
 from common import (
     validate_token_and_get_user,
     fetch_rate_for_pair_from_exchange,
-    get_account_by_id_from_profile,  # Importar la función correcta
+    get_account_by_id_from_profile,  # Función actualizada
     update_balance_in_profile
 )
 
@@ -32,7 +32,7 @@ def lambda_handler(event, context):
         to_currency = body.get('toCurrency')
         transfer_currency = body.get('transferCurrency', False)
 
-        # Validaciones
+        # Validaciones de los campos de entrada
         if not all([from_user_id, to_user_id, from_account_id, to_account_id, amount, from_currency, to_currency]):
             return respond(400, {'error': 'All fields are required'})
         if not isinstance(amount, (int, float)) or amount <= 0:
@@ -48,6 +48,7 @@ def lambda_handler(event, context):
         except Exception as e:
             return respond(500, {'error': f'Error fetching account balance: {str(e)}'})
 
+        # Verificar si la cuenta de origen tiene suficiente saldo
         if from_balance < amount:
             return respond(400, {'error': 'Insufficient balance in source account'})
 
@@ -67,7 +68,7 @@ def lambda_handler(event, context):
         # Registrar la fecha y hora de la transacción
         timestamp = datetime.utcnow().isoformat()
 
-        # Actualizaciones (idealmente se haría con transacciones)
+        # Actualizar el saldo de las cuentas (con transacciones ideales)
         try:
             update_balance_in_profile(from_user_id, from_account_id, -amount, token)
             update_balance_in_profile(to_user_id, to_account_id, converted_amount, token)
