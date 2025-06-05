@@ -92,10 +92,13 @@ resources:
           Enabled: true
 
 outputs:
-  ExchangeApiBaseUrl:
+  ExchangeApiBaseUrl-${sls:stage}:
     value:
-      Fn::Sub: https://${ApiGatewayRestApi}.execute-api.${AWS::Region}.amazonaws.com/${sls:stage}
+      Fn::Sub: 'https://${ApiGatewayRestApi}.execute-api.${AWS::Region}.amazonaws.com/${sls:stage}'
     export:
       name: ExchangeApiBaseUrl-${sls:stage}
+
+
+
 
 
