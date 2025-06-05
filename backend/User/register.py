@@ -58,7 +58,9 @@ def lambda_handler(event, context):
         lastName = body.get('lastName')
         phoneNumber = body.get('phoneNumber')
         dni = body.get('dni')
-        role = body.get('role', 'user')  # Añadido campo de rol
+
+        # Default role for new users is 'user', admins can modify this as needed
+        role = body.get('role', 'user')
 
         print(f"[DEBUG] Email: {email}, Name: {name}, LastName: {lastName}, Phone: {phoneNumber}, DNI: {dni}, Role: {role}")
 
@@ -95,8 +97,8 @@ def lambda_handler(event, context):
             'lastName': lastName,
             'phoneNumber': phoneNumber,
             'dni': dni,
-            'created_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-            'role': role  # Se guarda el rol
+            'role': role,  # Agregamos el campo 'role' al usuario
+            'created_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         }
 
         print(f"[INFO] Saving user: {item}")
