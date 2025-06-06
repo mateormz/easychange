@@ -108,16 +108,6 @@ def fetch_rate_for_pair_from_exchange(source, target, token):
 
 
 
-import json
-import os
-
-import boto3
-import json
-import os
-
-lambda_client = boto3.client('lambda')
-
-
 def get_account_balance_from_profile(user_id, account_id, token):
     """
     Llama a la Lambda del servicio de perfil para obtener las cuentas bancarias del usuario
@@ -127,7 +117,10 @@ def get_account_balance_from_profile(user_id, account_id, token):
 
     # Preparar el payload para la invocación
     payload = {
-        "body": json.dumps({"user_id": user_id})  # Pasamos el user_id para obtener las cuentas
+        "pathParameters": {
+            "user_id": user_id  # Pasar el user_id como parte de los path parameters
+        },
+        "body": json.dumps({"account_id": account_id})  # Puede incluir otros parámetros en el cuerpo si es necesario
     }
 
     # El token debe ir dentro del payload, no en los headers
@@ -193,6 +186,7 @@ def get_account_balance_from_profile(user_id, account_id, token):
 
     except Exception as e:
         raise Exception(f"Error fetching account balance: {str(e)}")
+
 
 
 
