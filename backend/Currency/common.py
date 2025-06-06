@@ -186,41 +186,35 @@ def get_account_balance_from_profile(user_id, account_id, token):
     except Exception as e:
         raise Exception(f"Error fetching account balance: {str(e)}")
 
-def update_balance_in_profile(user_id, account_id, amount, token):
+def update_balance_in_profile(user_id, account_id, new_balance, token):
     """
-    Actualiza el saldo de una cuenta bancaria del usuario invocando la Lambda correspondiente
-    en el servicio de perfil. El token de autorización se pasa en los encabezados.
+    Actualiza el saldo de una cuenta bancaria del usuario invocando la Lambda correspondiente.
+    Se pasa el nuevo saldo como string, conforme lo espera la función del servicio Profile.
     """
     function_name = f"{PROFILE_SERVICE_NAME}-{os.environ['STAGE']}-actualizarCuenta"
 
-    # Preparar el cuerpo del payload sin el token
     payload = {
         "body": json.dumps({
-            "user_id": user_id,
-            "account_id": account_id,
-            "amount": amount
-        })
-    }
-
-    # Poner el token dentro del payload
-    token_payload = {
-        "body": payload["body"],
-        "headers": {"Authorization": token}  # Incluir el token aquí dentro del payload
+            "saldo": str(new_balance)  # Enviamos el nuevo saldo como string
+        }),
+        "pathParameters": {
+            "cuenta_id": account_id
+        },
+        "headers": {
+            "Authorization": token
+        }
     }
 
     try:
-        # Invocar la Lambda de actualización de saldo
         response = lambda_client.invoke(
             FunctionName=function_name,
-            InvocationType='RequestResponse',  # Llamada síncrona
-            Payload=json.dumps(token_payload),  # Pasa el token dentro del payload
+            InvocationType='RequestResponse',
+            Payload=json.dumps(payload),
         )
 
-        # Leer la respuesta de la Lambda
         result = json.loads(response['Payload'].read().decode())
-
-        # Devolver el resultado de la invocación
         return result
 
     except Exception as e:
         raise Exception(f"Error al actualizar el saldo de la cuenta: {str(e)}")
+
