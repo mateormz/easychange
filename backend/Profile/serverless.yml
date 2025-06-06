@@ -27,7 +27,7 @@ functions:
     handler: listBankAccounts.lambda_handler
     events:
       - http:
-          path: profile/bankacc/{user_id}
+          path: profile/bankacc/user/{user_id}   # 👈 CAMBIO AQUÍ
           method: get
           cors: true
 
@@ -35,7 +35,7 @@ functions:
     handler: updateBankAccount.lambda_handler
     events:
       - http:
-          path: profile/bankacc/{cuenta_id}
+          path: profile/bankacc/account/{cuenta_id}  # 👈 CAMBIO AQUÍ
           method: put
           cors: true
 
@@ -43,7 +43,7 @@ functions:
     handler: deleteBankAccount.lambda_handler
     events:
       - http:
-          path: profile/bankacc/{cuenta_id}
+          path: profile/bankacc/account/{cuenta_id}  # 👈 CAMBIO AQUÍ
           method: delete
           cors: true
 
