@@ -55,12 +55,12 @@ class AddMoneyToBankAccountHandler(BaseBankAccountHandler):
             except Exception:
                 return {
                     'statusCode': 400,
-                    'body': json.dumps({'error': 'Invalid amount format'})
+                    'body': json.dumps({'error': 'Invalid saldo format'})
                 }
 
-            # Fetch the current amount of money in the bank account
+            # Fetch the current saldo of the bank account
             response = table.get_item(
-                Key={'usuario_id': usuario_id, 'cuenta_id': bank_acc_id}  # Full key to get account
+                Key={'usuario_id': usuario_id, 'cuenta_id': bank_acc_id}
             )
 
             if 'Item' not in response:
@@ -69,22 +69,22 @@ class AddMoneyToBankAccountHandler(BaseBankAccountHandler):
                     'body': json.dumps({'error': 'Bank account not found'})
                 }
 
-            current_amount = response['Item'].get('amount', '0')
+            current_saldo = response['Item'].get('saldo', '0')
 
-            # Convert the current amount (stored as a string) to Decimal
-            current_amount = Decimal(str(current_amount))
+            # Convert the current saldo (stored as a string) to Decimal
+            current_saldo = Decimal(str(current_saldo))
 
-            # Calculate the new amount
-            new_amount = current_amount + transfered_money
+            # Calculate the new saldo
+            new_saldo = current_saldo + transfered_money
 
-            # Update the bank account with the new amount
+            # Update the bank account with the new saldo
             table.update_item(
                 Key={'usuario_id': usuario_id, 'cuenta_id': bank_acc_id},
-                UpdateExpression="SET amount = :new_amount",
-                ExpressionAttributeValues={':new_amount': str(new_amount)}  # Save as string
+                UpdateExpression="SET saldo = :new_saldo",
+                ExpressionAttributeValues={':new_saldo': str(new_saldo)}  # Save as string
             )
 
-            return self.format_response('Amount successfully updated')
+            return self.format_response('Saldo actualizado correctamente')
 
         except Exception as e:
             return self.handle_error(e)

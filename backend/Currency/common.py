@@ -1,6 +1,7 @@
 import boto3
 import os
 import json
+import requests
 import urllib.request
 import urllib.error
 
@@ -217,3 +218,36 @@ def update_balance_in_profile(account_id, new_balance, token):
 
     except Exception as e:
         raise Exception(f"Error al actualizar el saldo de la cuenta: {str(e)}")
+
+
+def add_money_to_account_in_profile(account_id, user_id, transfered_money, token):
+    """
+    Agrega dinero a una cuenta bancaria invocando la Lambda `addMoneyToBankAccount`.
+    Esta función debe usarse para la cuenta destino en una transferencia.
+    """
+    function_name = f"{PROFILE_SERVICE_NAME}-{os.environ['STAGE']}-addMoneyToBankAccount"
+
+    payload = {
+        "body": json.dumps({
+            "usuario_id": user_id,
+            "bankAccId": account_id,
+            "transfered_money": str(transfered_money)
+        }),
+        "headers": {
+            "Authorization": token
+        }
+    }
+
+    try:
+        response = lambda_client.invoke(
+            FunctionName=function_name,
+            InvocationType='RequestResponse',
+            Payload=json.dumps(payload),
+        )
+
+        result = json.loads(response['Payload'].read().decode())
+        return result
+
+    except Exception as e:
+        raise Exception(f"Error al agregar dinero a la cuenta destino: {str(e)}")
+

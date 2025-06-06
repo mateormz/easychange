@@ -6,7 +6,8 @@ from common import (
     validate_token_and_get_user,
     fetch_rate_for_pair_from_exchange,
     get_account_balance_from_profile,
-    update_balance_in_profile
+    update_balance_in_profile,
+    add_money_to_account_in_profile  # ✅ función correcta
 )
 
 lambda_client = boto3.client('lambda')
@@ -35,8 +36,6 @@ def lambda_handler(event, context):
 
         from_currency = from_currency.upper()
         to_currency = to_currency.upper()
-
-        # 👉 Nueva lógica para determinar si se necesita conversión de moneda
         transfer_currency = from_currency != to_currency
 
         try:
@@ -62,20 +61,25 @@ def lambda_handler(event, context):
         transaction_id = str(uuid.uuid4())
         timestamp = datetime.utcnow().isoformat()
 
-        # 👉 Calculamos los nuevos saldos
         new_from_balance = from_balance - amount
-        new_to_balance = to_balance + converted_amount
 
         try:
+            # ✅ Restar saldo a la cuenta fuente
             update_balance_in_profile(from_account_id, new_from_balance, token)
-            update_balance_in_profile(to_account_id, new_to_balance, token)
+
+            # ✅ Sumar saldo a la cuenta destino usando Lambda
+            result = add_money_to_account_in_profile(to_account_id, to_user_id, converted_amount, token)
+
+            if result.get('statusCode') != 200:
+                raise Exception(f"Failed to add money to destination account: {result.get('body')}")
+
         except Exception as e:
-            return respond(500, {'error': f'Error updating balance: {str(e)}'})
+            return respond(500, {'error': f'Error updating balances: {str(e)}'})
 
         return respond(200, {
             'message': 'Transfer successful',
             'fromUserBalance': new_from_balance,
-            'toUserBalance': new_to_balance,
+            'toUserBalance': to_balance + converted_amount,
             'transactionId': transaction_id,
             'amountTransferred': amount,
             'exchangeRate': exchange_rate,
@@ -84,6 +88,7 @@ def lambda_handler(event, context):
 
     except Exception as e:
         return respond(500, {'error': str(e)})
+
 
 def respond(status_code, body):
     return {
