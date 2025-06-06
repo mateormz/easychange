@@ -166,8 +166,8 @@ def get_account_balance_from_profile(user_id, account_id, token):
         if not body:
             raise Exception("No accounts found for the user.")
 
-        # Imprimir el contenido de la respuesta para ver la estructura exacta
-        print(f"Response body: {json.dumps(body)}")  # Depuración
+        # Depuración: Imprimir las cuentas recibidas
+        print(f"Accounts: {json.dumps(body)}")  # Depuración
 
         # Buscar la cuenta correspondiente por account_id
         account = next((acc for acc in body if acc.get('cuenta_id') == account_id), None)
