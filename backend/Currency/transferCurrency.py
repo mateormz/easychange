@@ -65,8 +65,8 @@ def lambda_handler(event, context):
         new_to_balance = to_balance + converted_amount
 
         try:
-            update_balance_in_profile(from_user_id, from_account_id, new_from_balance, token)
-            update_balance_in_profile(to_user_id, to_account_id, new_to_balance, token)
+            update_balance_in_profile(from_account_id, new_from_balance, token)
+            update_balance_in_profile(to_account_id, new_to_balance, token)
         except Exception as e:
             return respond(500, {'error': f'Error updating balance: {str(e)}'})
 

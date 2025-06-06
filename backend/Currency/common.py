@@ -186,10 +186,10 @@ def get_account_balance_from_profile(user_id, account_id, token):
     except Exception as e:
         raise Exception(f"Error fetching account balance: {str(e)}")
 
-def update_balance_in_profile(user_id, account_id, new_balance, token):
+def update_balance_in_profile(account_id, new_balance, token):
     """
-    Actualiza el saldo de una cuenta bancaria del usuario invocando la Lambda correspondiente.
-    Se pasa el nuevo saldo como string, conforme lo espera la función del servicio Profile.
+    Actualiza el saldo de una cuenta bancaria invocando la Lambda correspondiente.
+    Se pasa el nuevo saldo como string, conforme lo espera el servicio Profile.
     """
     function_name = f"{PROFILE_SERVICE_NAME}-{os.environ['STAGE']}-actualizarCuenta"
 
@@ -217,4 +217,3 @@ def update_balance_in_profile(user_id, account_id, new_balance, token):
 
     except Exception as e:
         raise Exception(f"Error al actualizar el saldo de la cuenta: {str(e)}")
-
