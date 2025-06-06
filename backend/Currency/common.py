@@ -122,6 +122,13 @@ import os
 lambda_client = boto3.client('lambda')
 
 
+import boto3
+import json
+import os
+
+lambda_client = boto3.client('lambda')
+
+
 def get_account_balance_from_profile(user_id, account_id, token):
     """
     Llama a la Lambda del servicio de perfil para obtener las cuentas bancarias del usuario
@@ -158,12 +165,16 @@ def get_account_balance_from_profile(user_id, account_id, token):
         # Obtener el contenido de 'body'
         body = response_payload['body']
 
-        # Comprobar si body es una cadena
+        # Comprobar si body es una cadena, y si es así, intentar convertirlo
         if isinstance(body, str):
             try:
                 body = json.loads(body)  # Convertirlo en un objeto JSON si es una cadena
             except json.JSONDecodeError:
                 raise Exception("La respuesta en 'body' no es un JSON válido.")
+
+        # Verificar que estamos obteniendo una lista de cuentas
+        if not isinstance(body, list):
+            raise Exception(f"Expected a list of accounts, but got {type(body)}")
 
         # Verificar que tenemos cuentas
         if not body:
@@ -183,6 +194,7 @@ def get_account_balance_from_profile(user_id, account_id, token):
 
     except Exception as e:
         raise Exception(f"Error fetching account balance: {str(e)}")
+
 
 
 

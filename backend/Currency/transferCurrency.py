@@ -49,6 +49,7 @@ def lambda_handler(event, context):
         except Exception as e:
             return respond(500, {'error': f'Error fetching account balance: {str(e)}'})
 
+        # Verificar que el saldo de la cuenta de origen sea suficiente
         if from_balance < amount:
             return respond(400, {'error': 'Insufficient balance in source account'})
 
@@ -58,9 +59,12 @@ def lambda_handler(event, context):
 
         if transfer_currency:
             # Llamada a la función Lambda para obtener la tasa de cambio
-            rate = float(fetch_rate_for_pair_from_exchange(from_currency, to_currency, token))
-            converted_amount = amount * rate
-            exchange_rate = rate  # Guardar la tasa de cambio utilizada
+            try:
+                rate = float(fetch_rate_for_pair_from_exchange(from_currency, to_currency, token))
+                converted_amount = amount * rate
+                exchange_rate = rate  # Guardar la tasa de cambio utilizada
+            except Exception as e:
+                return respond(500, {'error': f'Error fetching exchange rate: {str(e)}'})
 
         # Crear un transactionId único para la transacción
         transaction_id = str(uuid.uuid4())
@@ -99,4 +103,3 @@ def respond(status_code, body):
         },
         'body': json.dumps(body)
     }
-
