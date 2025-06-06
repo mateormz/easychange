@@ -108,13 +108,6 @@ def fetch_rate_for_pair_from_exchange(source, target, token):
 import json
 import logging
 
-# Configuración del logger para obtener detalles más claros
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger()
-
-lambda_client = boto3.client('lambda')
-
-
 def get_account_balance_from_profile(user_id, account_id, token):
     """
     Llama a la Lambda del servicio de perfil para obtener las cuentas bancarias del usuario
@@ -174,10 +167,11 @@ def get_account_balance_from_profile(user_id, account_id, token):
             raise Exception(f"Account with account_id {account_id} not found.")
 
         # Log del saldo de la cuenta encontrada
-        logger.info(f"Saldo encontrado para la cuenta {account_id}: {account.get('saldo', 0)}")
+        saldo = account.get('saldo', '0')  # Obtener saldo como cadena
+        logger.info(f"Saldo encontrado para la cuenta {account_id}: {saldo}")
 
-        # Retornar el saldo de la cuenta
-        return float(account.get('saldo', 0))  # Retornar el saldo como float
+        # Convertir el saldo a float antes de devolverlo
+        return float(saldo)  # Retornar el saldo como float
 
     except Exception as e:
         logger.error(f"Error al obtener el saldo de la cuenta: {str(e)}")  # Log del error
