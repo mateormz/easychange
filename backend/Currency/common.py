@@ -108,6 +108,20 @@ def fetch_rate_for_pair_from_exchange(source, target, token):
 lambda_client = boto3.client('lambda')
 
 
+import boto3
+import json
+import os
+
+lambda_client = boto3.client('lambda')
+
+
+import boto3
+import json
+import os
+
+lambda_client = boto3.client('lambda')
+
+
 def get_account_balance_from_profile(user_id, account_id, token):
     """
     Llama a la Lambda del servicio de perfil para obtener las cuentas bancarias del usuario
@@ -141,11 +155,15 @@ def get_account_balance_from_profile(user_id, account_id, token):
         if 'body' not in response_payload:
             raise Exception("No body found in response.")
 
-        body = response_payload.get('body', [])
+        # Obtener el contenido de 'body'
+        body = response_payload['body']
 
-        # Si la respuesta es una cadena, convertirla a un diccionario
+        # Comprobar si body es una cadena
         if isinstance(body, str):
-            body = json.loads(body)
+            try:
+                body = json.loads(body)  # Convertirlo en un objeto JSON si es una cadena
+            except json.JSONDecodeError:
+                raise Exception("La respuesta en 'body' no es un JSON válido.")
 
         # Verificar que tenemos cuentas
         if not body:
@@ -165,6 +183,8 @@ def get_account_balance_from_profile(user_id, account_id, token):
 
     except Exception as e:
         raise Exception(f"Error fetching account balance: {str(e)}")
+
+
 
 
 
