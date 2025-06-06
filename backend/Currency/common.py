@@ -105,8 +105,8 @@ def fetch_rate_for_pair_from_exchange(source, target, token):
         raise Exception(f"Failed to fetch exchange rate via Lambda: {str(e)}")
 
 
-import json
-import logging
+lambda_client = boto3.client('lambda')
+
 
 def get_account_balance_from_profile(user_id, account_id, token):
     """
@@ -114,13 +114,11 @@ def get_account_balance_from_profile(user_id, account_id, token):
     y luego filtra la cuenta específica para obtener el saldo.
     """
     function_name = f"{PROFILE_SERVICE_NAME}-{os.environ['STAGE']}-listarCuentas"  # Función para listar las cuentas
-    logger.info(f"Invocando Lambda con FunctionName: {function_name} y user_id: {user_id}")  # Log de la invocación
 
     # Preparar el payload para la invocación
     payload = {
         "body": json.dumps({"user_id": user_id})  # Pasamos el user_id para obtener las cuentas
     }
-    logger.info(f"Payload enviado a la Lambda: {json.dumps(payload)}")  # Log del payload
 
     # El token debe ir dentro del payload, no en los headers
     token_payload = {
@@ -130,8 +128,6 @@ def get_account_balance_from_profile(user_id, account_id, token):
 
     try:
         # Invocar la Lambda de cuentas
-        logger.info(
-            f"Invocando Lambda para obtener cuentas con token: {token[:10]}...")  # Log del token (solo los primeros 10 caracteres por seguridad)
         response = lambda_client.invoke(
             FunctionName=function_name,
             InvocationType='RequestResponse',
@@ -140,41 +136,34 @@ def get_account_balance_from_profile(user_id, account_id, token):
 
         # Parsear la respuesta de la Lambda
         response_payload = json.loads(response['Payload'].read().decode())
-        logger.info(f"Respuesta de la Lambda: {json.dumps(response_payload)}")  # Log de la respuesta
 
         # Verificar que la respuesta tenga una clave 'body' que contenga la lista de cuentas
         if 'body' not in response_payload:
             raise Exception("No body found in response.")
 
         body = response_payload.get('body', [])
-        logger.info(f"Cuentas obtenidas: {json.dumps(body)}")  # Log de las cuentas obtenidas
 
         # Si la respuesta es una cadena, convertirla a un diccionario
         if isinstance(body, str):
             body = json.loads(body)
-            logger.info(f"Respuesta convertida a JSON: {json.dumps(body)}")  # Log de la conversión
 
         # Verificar que tenemos cuentas
         if not body:
             raise Exception("No accounts found for the user.")
-        logger.info(f"Cuentas válidas encontradas para el usuario: {user_id}")
 
         # Buscar la cuenta correspondiente por account_id
         account = next((acc for acc in body if acc['cuenta_id'] == account_id), None)
-        logger.info(f"Buscando cuenta con account_id: {account_id}...")  # Log de búsqueda de la cuenta
 
         if not account:
             raise Exception(f"Account with account_id {account_id} not found.")
 
-        # Log del saldo de la cuenta encontrada
-        saldo = account.get('saldo', '0')  # Obtener saldo como cadena
-        logger.info(f"Saldo encontrado para la cuenta {account_id}: {saldo}")
+        # Obtener saldo como cadena
+        saldo = account.get('saldo', '0')
 
         # Convertir el saldo a float antes de devolverlo
         return float(saldo)  # Retornar el saldo como float
 
     except Exception as e:
-        logger.error(f"Error al obtener el saldo de la cuenta: {str(e)}")  # Log del error
         raise Exception(f"Error fetching account balance: {str(e)}")
 
 
