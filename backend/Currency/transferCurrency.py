@@ -1,6 +1,7 @@
 import boto3
 import json
 import uuid
+import os
 from datetime import datetime
 from common import (
     validate_token_and_get_user,
@@ -11,6 +12,9 @@ from common import (
 )
 
 lambda_client = boto3.client('lambda')
+dynamodb = boto3.resource('dynamodb')
+table = dynamodb.Table(os.environ['USER_CONVERSIONS_TABLE'])
+
 
 def lambda_handler(event, context):
     try:
@@ -72,6 +76,23 @@ def lambda_handler(event, context):
 
             if result.get('statusCode') != 200:
                 raise Exception(f"Failed to add money to destination account: {result.get('body')}")
+
+            table.put_item(
+                Item={
+                    'user_id': from_user_id,
+                    'timestamp': timestamp,
+                    'transaction_id': transaction_id,
+                    'from_account_id': from_account_id,
+                    'to_user_id': to_user_id,
+                    'to_account_id': to_account_id,
+                    'amount': amount,
+                    'converted_amount': converted_amount,
+                    'from_currency': from_currency,
+                    'to_currency': to_currency,
+                    'exchange_rate': exchange_rate,
+                    'status': 'success'
+                }
+            )
 
         except Exception as e:
             return respond(500, {'error': f'Error updating balances: {str(e)}'})

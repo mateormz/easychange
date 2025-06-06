@@ -2,6 +2,7 @@ import boto3
 import json
 import os
 from common import validate_token_and_get_user
+from boto3.dynamodb.conditions import Key  # ✅ IMPORT NECESARIO
 
 def lambda_handler(event, context):
     try:
@@ -11,7 +12,7 @@ def lambda_handler(event, context):
         table = dynamodb.Table(os.environ['USER_CONVERSIONS_TABLE'])
 
         response = table.query(
-            KeyConditionExpression=boto3.dynamodb.conditions.Key('user_id').eq(user_id)
+            KeyConditionExpression=Key('user_id').eq(user_id)
         )
 
         transactions = response.get('Items', [])
