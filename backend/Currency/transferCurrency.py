@@ -93,7 +93,6 @@ def lambda_handler(event, context):
     except Exception as e:
         return respond(500, {'error': str(e)})
 
-
 def respond(status_code, body):
     return {
         'statusCode': status_code,
@@ -103,3 +102,4 @@ def respond(status_code, body):
         },
         'body': json.dumps(body)
     }
+

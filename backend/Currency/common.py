@@ -118,7 +118,7 @@ def get_account_balance_from_profile(user_id, account_id, token):
     # Preparar el payload para la invocación
     payload = {
         "pathParameters": {
-            "user_id": user_id  # Pasar el user_id como parte de los path parameters
+            "user_id": user_id  # Aquí pasamos el user_id en los path parameters correctamente
         },
         "body": json.dumps({"account_id": account_id})  # Puede incluir otros parámetros en el cuerpo si es necesario
     }
@@ -186,8 +186,6 @@ def get_account_balance_from_profile(user_id, account_id, token):
 
     except Exception as e:
         raise Exception(f"Error fetching account balance: {str(e)}")
-
-
 
 
 
