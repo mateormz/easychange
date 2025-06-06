@@ -123,8 +123,9 @@ def get_account_balance_from_profile(user_id, account_id, token):
 
     # El token debe ir dentro del payload, no en los headers
     token_payload = {
+        "pathParameters": payload["pathParameters"],
         "body": payload["body"],
-        "headers": {"Authorization": token}  # El token aquí está en el payload
+        "headers": {"Authorization": token}
     }
 
     try:
