@@ -1,9 +1,7 @@
 import boto3
 import os
 import json
-import requests
-import urllib.request
-import urllib.error
+
 
 # Recursos globales
 lambda_client = boto3.client('lambda')
