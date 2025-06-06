@@ -11,7 +11,6 @@ lambda_client = boto3.client('lambda')
 EXCHANGE_SERVICE_NAME = os.environ['EXCHANGE_SERVICE_NAME']
 PROFILE_SERVICE_NAME = os.environ['PROFILE_SERVICE_NAME']
 
-
 def validate_token_and_get_user(event):
     """
     Valida el token de autorización en el header 'Authorization' invocando la lambda validateToken.
@@ -64,7 +63,6 @@ def validate_token_and_get_user(event):
             "body": json.dumps({"error": f"Error al validar el token: {str(e)}"})
         }
 
-
 def fetch_rate_for_pair_from_exchange(source, target, token):
     """
     Llama a la función Lambda del servicio de cambio de divisas para obtener la tasa de cambio entre dos monedas.
@@ -104,16 +102,16 @@ def fetch_rate_for_pair_from_exchange(source, target, token):
     except Exception as e:
         raise Exception(f"Failed to fetch exchange rate via Lambda: {str(e)}")
 
-
-
-
-
 def get_account_balance_from_profile(user_id, account_id, token):
     """
     Llama a la Lambda del servicio de perfil para obtener las cuentas bancarias del usuario
     y luego filtra la cuenta específica para obtener el saldo.
     """
     function_name = f"{PROFILE_SERVICE_NAME}-{os.environ['STAGE']}-listarCuentas"  # Función para listar las cuentas
+
+    # Verificar que user_id y account_id no sean vacíos
+    if not user_id or not account_id:
+        raise Exception(f"Missing user_id or account_id. user_id: {user_id}, account_id: {account_id}")
 
     # Preparar el payload para la invocación
     payload = {
@@ -187,8 +185,6 @@ def get_account_balance_from_profile(user_id, account_id, token):
     except Exception as e:
         raise Exception(f"Error fetching account balance: {str(e)}")
 
-
-
 def update_balance_in_profile(user_id, account_id, amount, token):
     """
     Actualiza el saldo de una cuenta bancaria del usuario invocando la Lambda correspondiente
@@ -227,5 +223,3 @@ def update_balance_in_profile(user_id, account_id, amount, token):
 
     except Exception as e:
         raise Exception(f"Error al actualizar el saldo de la cuenta: {str(e)}")
-
-

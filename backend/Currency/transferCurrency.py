@@ -102,4 +102,3 @@ def respond(status_code, body):
         },
         'body': json.dumps(body)
     }
-
