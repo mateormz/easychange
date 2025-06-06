@@ -77,19 +77,20 @@ def lambda_handler(event, context):
             if result.get('statusCode') != 200:
                 raise Exception(f"Failed to add money to destination account: {result.get('body')}")
 
+            # ✅ Guardar transacción en DynamoDB
             table.put_item(
                 Item={
-                    'user_id': from_user_id,
+                    'user_id': str(from_user_id),
                     'timestamp': timestamp,
                     'transaction_id': transaction_id,
-                    'from_account_id': from_account_id,
-                    'to_user_id': to_user_id,
-                    'to_account_id': to_account_id,
-                    'amount': amount,
-                    'converted_amount': converted_amount,
+                    'from_account_id': str(from_account_id),
+                    'to_user_id': str(to_user_id),
+                    'to_account_id': str(to_account_id),
+                    'amount': str(amount),
+                    'converted_amount': str(converted_amount),
                     'from_currency': from_currency,
                     'to_currency': to_currency,
-                    'exchange_rate': exchange_rate,
+                    'exchange_rate': str(exchange_rate) if exchange_rate is not None else None,
                     'status': 'success'
                 }
             )
