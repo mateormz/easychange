@@ -105,29 +105,11 @@ def fetch_rate_for_pair_from_exchange(source, target, token):
         raise Exception(f"Failed to fetch exchange rate via Lambda: {str(e)}")
 
 
-lambda_client = boto3.client('lambda')
 
 
-import boto3
+
 import json
 import os
-
-lambda_client = boto3.client('lambda')
-
-
-import boto3
-import json
-import os
-
-lambda_client = boto3.client('lambda')
-
-
-import boto3
-import json
-import os
-
-lambda_client = boto3.client('lambda')
-
 
 def get_account_balance_from_profile(user_id, account_id, token):
     """
@@ -165,12 +147,16 @@ def get_account_balance_from_profile(user_id, account_id, token):
         # Obtener el contenido de 'body'
         body = response_payload['body']
 
-        # Comprobar si body es una cadena, y si es así, intentar convertirlo
+        # Si body es una cadena, convertirlo a un objeto JSON
         if isinstance(body, str):
             try:
                 body = json.loads(body)  # Convertirlo en un objeto JSON si es una cadena
             except json.JSONDecodeError:
                 raise Exception("La respuesta en 'body' no es un JSON válido.")
+
+        # Comprobar si body es un diccionario (en lugar de una lista)
+        if isinstance(body, dict):
+            body = [body]  # Convertir el diccionario a una lista que contenga ese diccionario
 
         # Verificar que estamos obteniendo una lista de cuentas
         if not isinstance(body, list):
@@ -194,9 +180,6 @@ def get_account_balance_from_profile(user_id, account_id, token):
 
     except Exception as e:
         raise Exception(f"Error fetching account balance: {str(e)}")
-
-
-
 
 
 
