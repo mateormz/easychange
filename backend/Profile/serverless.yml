@@ -87,6 +87,14 @@ functions:
           method: delete
           cors: true
 
+  addMoneyToBankAccount:
+      handler: addMoneyToBankAccount.lambda_handler
+      events:
+        - http:
+            path: profile/bankacc/addmoney
+            method: post
+            cors: true
+
 resources:
   Resources:
     BankAccountsTable:
