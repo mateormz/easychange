@@ -27,7 +27,6 @@ def lambda_handler(event, context):
         amount = body.get('amount')
         from_currency = body.get('fromCurrency')
         to_currency = body.get('toCurrency')
-        transfer_currency = body.get('transferCurrency', False)
 
         if not all([from_user_id, to_user_id, from_account_id, to_account_id, amount, from_currency, to_currency]):
             return respond(400, {'error': 'All fields are required'})
@@ -36,6 +35,9 @@ def lambda_handler(event, context):
 
         from_currency = from_currency.upper()
         to_currency = to_currency.upper()
+
+        # 👉 Nueva lógica para determinar si se necesita conversión de moneda
+        transfer_currency = from_currency != to_currency
 
         try:
             from_balance = get_account_balance_from_profile(from_user_id, from_account_id, token)
