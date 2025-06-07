@@ -2,10 +2,11 @@ import boto3
 import os
 import json
 
+
 class TokenValidator:
     _instance = None
     _lambda_client = None
-    
+
     def __new__(cls):
         if cls._instance is None:
             # Ensure that only one instance is created
@@ -34,8 +35,10 @@ class TokenValidator:
         user_info = json.loads(validation_result.get('body', '{}'))
         return user_info.get('user_id')
 
+
 # Singleton instance
 token_validator = TokenValidator()
+
 
 def validate_token_and_get_user(event):
     return token_validator.validate_token_and_get_user(event)
