@@ -7,6 +7,7 @@ from common import validate_token_and_get_user
 dynamodb = boto3.resource('dynamodb')
 table = dynamodb.Table(os.environ["TABLE_BANKACC"])
 
+
 # Base class with shared logic
 class BaseBankAccountHandler:
     def validate_and_prepare_data(self, event):
@@ -14,13 +15,13 @@ class BaseBankAccountHandler:
         user_id = validate_token_and_get_user(event)
         body = json.loads(event.get('body', '{}'))
         return user_id, body
-    
+
     def handle_error(self, error):
         return {
             'statusCode': 500,
             'body': json.dumps({'error': str(error)})
         }
-    
+
     def format_response(self, message, cuenta_id):
         return {
             'statusCode': 201,
@@ -29,6 +30,7 @@ class BaseBankAccountHandler:
 
     def perform_action(self, event):
         raise NotImplementedError("Subclasses should implement this method")
+
 
 # Subclass that handles the create bank account operation
 class CreateBankAccountHandler(BaseBankAccountHandler):
@@ -67,9 +69,10 @@ class CreateBankAccountHandler(BaseBankAccountHandler):
 
             # Return success response
             return self.format_response('Cuenta registrada con éxito', cuenta_id)
-        
+
         except Exception as e:
             return self.handle_error(e)
+
 
 def lambda_handler(event, context):
     # Instantiate the handler and execute the create account action
