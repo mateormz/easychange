@@ -27,7 +27,7 @@ functions:
     handler: listBankAccounts.lambda_handler
     events:
       - http:
-          path: profile/bankacc
+          path: profile/bankacc/user/{user_id}
           method: get
           cors: true
 
@@ -84,6 +84,14 @@ functions:
       - http:
           path: profile/alerts/{alerta_id}
           method: delete
+          cors: true
+
+  addMoneyToBankAccount:
+    handler: addMoneyToBankAccount.lambda_handler
+    events:
+      - http:
+          path: profile/bankacc/addmoney
+          method: post
           cors: true
 
 resources:
