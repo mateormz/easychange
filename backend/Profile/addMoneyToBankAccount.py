@@ -38,24 +38,24 @@ class AddMoneyToBankAccountHandler(BaseBankAccountHandler):
             # Validate token and extract request data
             user_id, body = self.validate_and_prepare_data(event)
 
-            # Extract bank account ID and transfer amount from the request body
+            # Extract bank account ID and amount from the request body
             bank_acc_id = body.get('bankAccId')
             usuario_id = body.get('usuario_id')  # The user ID of the account holder
-            transfered_money = body.get('transfered_money')
+            amount = body.get('amount')
 
-            if not bank_acc_id or not transfered_money or not usuario_id:
+            if not bank_acc_id or not amount or not usuario_id:
                 return {
                     'statusCode': 400,
-                    'body': json.dumps({'error': 'bankAccId, usuario_id, and transfered_money are required'})
+                    'body': json.dumps({'error': 'bankAccId, usuario_id, and amount are required'})
                 }
 
-            # Convert transferred money to Decimal for calculations
+            # Convert amount to Decimal for calculations
             try:
-                transfered_money = Decimal(str(transfered_money))
+                amount = Decimal(str(amount))
             except Exception:
                 return {
                     'statusCode': 400,
-                    'body': json.dumps({'error': 'Invalid saldo format'})
+                    'body': json.dumps({'error': 'Invalid amount format'})
                 }
 
             # Fetch the current saldo of the bank account
@@ -75,7 +75,7 @@ class AddMoneyToBankAccountHandler(BaseBankAccountHandler):
             current_saldo = Decimal(str(current_saldo))
 
             # Calculate the new saldo
-            new_saldo = current_saldo + transfered_money
+            new_saldo = current_saldo + amount
 
             # Update the bank account with the new saldo
             table.update_item(
