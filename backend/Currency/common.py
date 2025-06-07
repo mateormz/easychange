@@ -250,3 +250,61 @@ def add_money_to_account_in_profile(account_id, user_id, amount, token):
     except Exception as e:
         raise Exception(f"Error al agregar dinero a la cuenta destino: {str(e)}")
 
+
+def call_get_currency_date_limit(token):
+    """
+    Llama a la función Lambda getCurrencyDateLimit para obtener la fecha límite de cambios de divisas.
+    Requiere el token de autenticación.
+    """
+    lambda_client = boto3.client('lambda')
+
+    function_name = f"{os.environ['ADMIN_SERVICE_NAME']}-{os.environ['STAGE']}-getCurrencyDateLimit"
+
+    payload = {
+        'headers': {
+            'Authorization': token
+        }
+    }
+
+    response = lambda_client.invoke(
+        FunctionName=function_name,
+        InvocationType='RequestResponse',
+        Payload=json.dumps(payload)
+    )
+
+    result = json.loads(response['Payload'].read())
+
+    if result.get('statusCode') == 200:
+        return json.loads(result['body'])  # Devuelve el dict con config_id, user_id, date_limit
+    else:
+        raise Exception(f"Error al obtener currency date limit: {result.get('body')}")
+
+
+
+def call_get_currency_limit(token):
+    """
+    Llama a la función Lambda getCurrencyLimit para obtener el límite de monto permitido por transacción.
+    Requiere el token de autenticación.
+    """
+    lambda_client = boto3.client('lambda')
+
+    function_name = f"{os.environ['ADMIN_SERVICE_NAME']}-{os.environ['STAGE']}-getCurrencyLimit"
+
+    payload = {
+        'headers': {
+            'Authorization': token
+        }
+    }
+
+    response = lambda_client.invoke(
+        FunctionName=function_name,
+        InvocationType='RequestResponse',
+        Payload=json.dumps(payload)
+    )
+
+    result = json.loads(response['Payload'].read())
+
+    if result.get('statusCode') == 200:
+        return json.loads(result['body'])  # Devuelve el dict con amount, config_id, user_id, currency_type
+    else:
+        raise Exception(f"Error al obtener currency limit: {result.get('body')}")

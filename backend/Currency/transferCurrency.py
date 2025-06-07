@@ -2,13 +2,15 @@ import boto3
 import json
 import uuid
 import os
-from datetime import datetime
+from datetime import datetime, timezone
 from common import (
     validate_token_and_get_user,
     fetch_rate_for_pair_from_exchange,
     get_account_balance_from_profile,
     update_balance_in_profile,
-    add_money_to_account_in_profile  # ✅ función correcta
+    add_money_to_account_in_profile,
+    call_get_currency_date_limit,  # <-- Importa función para fecha límite
+    call_get_currency_limit        # <-- Importa función para límite de monto
 )
 
 lambda_client = boto3.client('lambda')
@@ -42,6 +44,35 @@ def lambda_handler(event, context):
         to_currency = to_currency.upper()
         transfer_currency = from_currency != to_currency
 
+        # Validar fecha límite para cambio de divisas
+        try:
+            currency_date_limit_resp = call_get_currency_date_limit(token)
+            date_limit_str = currency_date_limit_resp.get('date_limit')
+            if date_limit_str:
+                date_limit = datetime.fromisoformat(date_limit_str).replace(tzinfo=timezone.utc)
+                now = datetime.utcnow().replace(tzinfo=timezone.utc)
+                if now > date_limit:
+                    return respond(400, {'error': 'Currency exchange transactions are no longer allowed after the date limit'})
+        except Exception as e:
+            return respond(500, {'error': f'Error validating currency date limit: {str(e)}'})
+
+        # Validar límite máximo por transacción
+        try:
+            currency_limit_resp = call_get_currency_limit(token)
+            max_amount_usd = float(currency_limit_resp.get('amount', 0))
+            limit_currency = currency_limit_resp.get('currency_type', 'USD').upper()
+
+            amount_in_usd = amount
+            if from_currency != 'USD':
+                # Obtener tasa de cambio para convertir amount a USD y comparar
+                rate_to_usd = float(fetch_rate_for_pair_from_exchange(from_currency, 'USD', token))
+                amount_in_usd = amount * rate_to_usd
+
+            if amount_in_usd > max_amount_usd:
+                return respond(400, {'error': f'Transaction amount exceeds the maximum allowed limit of {max_amount_usd} USD'})
+        except Exception as e:
+            return respond(500, {'error': f'Error validating currency limit: {str(e)}'})
+
         try:
             from_balance = float(get_account_balance_from_profile(from_user_id, from_account_id, token))
             to_balance = float(get_account_balance_from_profile(to_user_id, to_account_id, token))
@@ -68,16 +99,16 @@ def lambda_handler(event, context):
         new_from_balance = from_balance - amount
 
         try:
-            # ✅ Restar amount a la cuenta fuente
+            # Restar amount a la cuenta fuente
             update_balance_in_profile(from_account_id, new_from_balance, token)
 
-            # ✅ Sumar amount a la cuenta destino usando Lambda
+            # Sumar amount a la cuenta destino usando Lambda
             result = add_money_to_account_in_profile(to_account_id, to_user_id, converted_amount, token)
 
             if result.get('statusCode') != 200:
                 raise Exception(f"Failed to add money to destination account: {result.get('body')}")
 
-            # ✅ Guardar transacción en DynamoDB
+            # Guardar transacción en DynamoDB
             table.put_item(
                 Item={
                     'user_id': str(from_user_id),
@@ -121,4 +152,3 @@ def respond(status_code, body):
         },
         'body': json.dumps(body)
     }
-

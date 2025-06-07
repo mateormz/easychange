@@ -17,6 +17,7 @@ provider:
     USER_REPORTS_TABLE: ${self:provider.stage}-user-reports
     PROFILE_SERVICE_NAME: easychange-profile-api
     EXCHANGE_SERVICE_NAME: exchange-rate-api # Actualiza el nombre si es necesario
+    ADMIN_SERVICE_NAME: disdb-admin-api
     CACHE_TTL_SECONDS: 3600
     SERVICE_NAME: disdb-auth-api
     STAGE: ${self:provider.stage}
