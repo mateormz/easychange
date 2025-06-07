@@ -230,7 +230,7 @@ def add_money_to_account_in_profile(account_id, user_id, amount, token):
         "body": json.dumps({
             "usuario_id": user_id,
             "bankAccId": account_id,
-            "amount": str(amount)  # ✅ Clave unificada
+            "transfered_money": str(amount)  # <- Cambiar aquí
         }),
         "headers": {
             "Authorization": token
