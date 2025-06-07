@@ -69,7 +69,7 @@ class AddMoneyToBankAccountHandler(BaseBankAccountHandler):
                     'body': json.dumps({'error': 'Bank account not found'})
                 }
 
-            current_saldo = response['Item'].get('saldo', '0')
+            current_saldo = response['Item'].get('amount', '0')
 
             # Convert the current saldo (stored as a string) to Decimal
             current_saldo = Decimal(str(current_saldo))
