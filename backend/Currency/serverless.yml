@@ -1,25 +1,33 @@
 org: ${env:SLS_ORG}
-service: currency-api
+service: currency-conversion-api
 
 provider:
   name: aws
   runtime: python3.12
-  iam:
-    role: ${env:AWS_ROLE_ARN}
+  stage: ${opt:stage, 'dev'}
+  region: us-east-1
   memorySize: 1024
   timeout: 29
+
+  iam:
+    role: ${env:AWS_ROLE_ARN}  # Asegúrate de que el rol tiene los permisos correctos
+
   environment:
-    TABLE_CURRENCY_CONVERSION: ${sls:stage}-currency-conversion-table
-    TABLE_REPORTS: ${sls:stage}-currency-reports-table
-    STAGE: ${sls:stage}
-    VALIDATE_TOKEN_FUNCTION: disdb-auth-api
+    USER_CONVERSIONS_TABLE: ${self:provider.stage}-user-conversions
+    USER_REPORTS_TABLE: ${self:provider.stage}-user-reports
+    PROFILE_SERVICE_NAME: easychange-profile-api
+    EXCHANGE_SERVICE_NAME: exchange-rate-api # Actualiza el nombre si es necesario
+    CACHE_TTL_SECONDS: 3600
+    SERVICE_NAME: disdb-auth-api
+    STAGE: ${self:provider.stage}
+    VALIDATE_TOKEN_FUNCTION: validateToken
 
 functions:
   convertCurrency:
     handler: convertCurrency.lambda_handler
     events:
       - http:
-          path: currency/convert
+          path: convertCurrency
           method: post
           cors: true
 
@@ -27,31 +35,15 @@ functions:
     handler: getCurrencyConversionByUserId.lambda_handler
     events:
       - http:
-          path: currency/conversion
+          path: getCurrencyConversionByUserId
           method: get
-          cors: true
-
-  updateCurrencyConversion:
-    handler: updateCurrencyConversion.lambda_handler
-    events:
-      - http:
-          path: currency/conversion/{conversion_id}
-          method: put
-          cors: true
-
-  deleteCurrencyConversion:
-    handler: deleteCurrencyConversion.lambda_handler
-    events:
-      - http:
-          path: currency/conversion/{conversion_id}
-          method: delete
           cors: true
 
   createReport:
     handler: createReport.lambda_handler
     events:
       - http:
-          path: currency/report
+          path: createReport
           method: post
           cors: true
 
@@ -59,57 +51,58 @@ functions:
     handler: getReportsByUser.lambda_handler
     events:
       - http:
-          path: currency/report
+          path: getReportsByUser
           method: get
           cors: true
 
-  updateReport:
-    handler: updateReport.lambda_handler
+  transferCurrency:
+    handler: transferCurrency.lambda_handler
     events:
       - http:
-          path: currency/report/{report_id}
-          method: put
+          path: transferCurrency
+          method: post
           cors: true
 
-  deleteReport:
-    handler: deleteReport.lambda_handler
+  # Función Lambda para obtener la tasa de cambio
+  getExchangeRate:
+    handler: exchangeRate.lambda_handler
     events:
       - http:
-          path: currency/report/{report_id}
-          method: delete
+          path: /exchange-rate/{from}/{to}
+          method: get
           cors: true
 
 resources:
   Resources:
-    CurrencyConversionTable:
+    UserConversionsTable:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: ${self:provider.environment.TABLE_CURRENCY_CONVERSION}
+        TableName: ${self:provider.environment.USER_CONVERSIONS_TABLE}
         AttributeDefinitions:
-          - AttributeName: usuario_id
+          - AttributeName: user_id
             AttributeType: S
-          - AttributeName: conversion_id
+          - AttributeName: timestamp
             AttributeType: S
         KeySchema:
-          - AttributeName: usuario_id
+          - AttributeName: user_id
             KeyType: HASH
-          - AttributeName: conversion_id
+          - AttributeName: timestamp
             KeyType: RANGE
         BillingMode: PAY_PER_REQUEST
         PointInTimeRecoverySpecification:
           PointInTimeRecoveryEnabled: true
 
-    ReportsTable:
+    UserReportsTable:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: ${self:provider.environment.TABLE_REPORTS}
+        TableName: ${self:provider.environment.USER_REPORTS_TABLE}
         AttributeDefinitions:
-          - AttributeName: usuario_id
+          - AttributeName: user_id
             AttributeType: S
           - AttributeName: report_id
             AttributeType: S
         KeySchema:
-          - AttributeName: usuario_id
+          - AttributeName: user_id
             KeyType: HASH
           - AttributeName: report_id
             KeyType: RANGE
