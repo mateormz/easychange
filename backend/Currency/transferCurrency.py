@@ -55,6 +55,8 @@ def lambda_handler(event, context):
         to_currency = to_currency.upper()
         transfer_currency = from_currency != to_currency
 
+        """
+        # Validación límite fecha (comentada)
         try:
             currency_date_limit_resp = call_get_currency_date_limit(token)
             date_limit_str = currency_date_limit_resp.get('date_limit')
@@ -65,7 +67,10 @@ def lambda_handler(event, context):
                     return respond(400, {'error': 'Currency exchange transactions are no longer allowed after the date limit'})
         except Exception as e:
             return respond(500, {'error': f'Error validating currency date limit: {str(e)}'})
+        """
 
+        """
+        # Validación límite monto (comentada)
         try:
             currency_limit_resp = call_get_currency_limit(token)
             max_amount_usd = float(currency_limit_resp.get('amount', 0))
@@ -80,6 +85,7 @@ def lambda_handler(event, context):
                 return respond(400, {'error': f'Transaction amount exceeds the maximum allowed limit of {max_amount_usd} USD'})
         except Exception as e:
             return respond(500, {'error': f'Error validating currency limit: {str(e)}'})
+        """
 
         try:
             from_balance = float(get_account_balance_from_profile(from_user_id, from_account_id, token))
