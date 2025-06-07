@@ -80,8 +80,8 @@ class AddMoneyToBankAccountHandler(BaseBankAccountHandler):
             # Update the bank account with the new saldo
             table.update_item(
                 Key={'usuario_id': usuario_id, 'cuenta_id': bank_acc_id},
-                UpdateExpression="SET saldo = :new_saldo",
-                ExpressionAttributeValues={':new_saldo': str(new_saldo)}  # Save as string
+                UpdateExpression="SET amount = :new_amount",
+                ExpressionAttributeValues={':new_amount': str(new_saldo)}  # Guardar como string
             )
 
             return self.format_response('Saldo actualizado correctamente')
