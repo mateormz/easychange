@@ -1,3 +1,4 @@
+
 import boto3
 import os
 import json
@@ -7,18 +8,9 @@ from common import validate_token_and_get_user
 dynamodb = boto3.resource('dynamodb')
 table = dynamodb.Table(os.environ["TABLE_BANKACC"])
 
-
 def lambda_handler(event, context):
     try:
         user_id = validate_token_and_get_user(event)
-
-        # Verificar si el parámetro 'moneda' está presente en la URL
-        if 'moneda' not in event['pathParameters']:
-            return {
-                "statusCode": 400,
-                "body": json.dumps({"error": "El parámetro 'moneda' es obligatorio"})
-            }
-
         moneda = event['pathParameters']['moneda']
 
         response = table.query(

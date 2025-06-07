@@ -68,10 +68,10 @@ def lambda_handler(event, context):
         new_from_balance = from_balance - amount
 
         try:
-            # ✅ Restar saldo a la cuenta fuente
+            # ✅ Restar amount a la cuenta fuente
             update_balance_in_profile(from_account_id, new_from_balance, token)
 
-            # ✅ Sumar saldo a la cuenta destino usando Lambda
+            # ✅ Sumar amount a la cuenta destino usando Lambda
             result = add_money_to_account_in_profile(to_account_id, to_user_id, converted_amount, token)
 
             if result.get('statusCode') != 200:
