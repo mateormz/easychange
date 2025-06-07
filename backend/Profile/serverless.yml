@@ -27,7 +27,7 @@ functions:
     handler: listBankAccounts.lambda_handler
     events:
       - http:
-          path: profile/bankacc
+          path: profile/bankacc/user/{user_id}
           method: get
           cors: true
 

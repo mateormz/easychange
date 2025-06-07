@@ -103,67 +103,87 @@ def fetch_rate_for_pair_from_exchange(source, target, token):
 
 def get_account_balance_from_profile(user_id, account_id, token):
     """
-    Invoca la Lambda del servicio de perfil que lista las cuentas del usuario
-    autenticado mediante el token, y filtra por 'account_id' para obtener el saldo.
+    Llama a la Lambda del servicio de perfil para obtener las cuentas bancarias del usuario
+    y luego filtra la cuenta específica para obtener el saldo.
     """
-    function_name = f"{PROFILE_SERVICE_NAME}-{os.environ['STAGE']}-listarCuentas"
+    function_name = f"{PROFILE_SERVICE_NAME}-{os.environ['STAGE']}-listarCuentas"  # Función para listar las cuentas
 
-    # Validar que el account_id no esté vacío (user_id ya no se requiere aquí)
-    if not account_id:
-        raise Exception(f"Missing account_id: {account_id}")
+    # Verificar que user_id y account_id no sean vacíos
+    if not user_id or not account_id:
+        raise Exception(f"Missing user_id or account_id. user_id: {user_id}, account_id: {account_id}")
 
-    # Construir el "event" simulado que se enviará a la Lambda del servicio de perfil
-    event_payload = {
-        "headers": {
-            "Authorization": token
-        }
+    # Preparar el payload para la invocación
+    payload = {
+        "pathParameters": {
+            "user_id": user_id  # Aquí pasamos el user_id en los path parameters correctamente
+        },
+        "body": json.dumps({"account_id": account_id})  # Puede incluir otros parámetros en el cuerpo si es necesario
+    }
+
+    # El token debe ir dentro del payload, no en los headers
+    token_payload = {
+        "pathParameters": payload["pathParameters"],
+        "body": payload["body"],
+        "headers": {"Authorization": token}
     }
 
     try:
-        # Invocar la Lambda remota que lista las cuentas
+        # Invocar la Lambda de cuentas
         response = lambda_client.invoke(
             FunctionName=function_name,
             InvocationType='RequestResponse',
-            Payload=json.dumps(event_payload),
+            Payload=json.dumps(token_payload),  # Pasa el token en el payload
         )
 
-        # Leer y decodificar el resultado
+        # Parsear la respuesta de la Lambda
         response_payload = json.loads(response['Payload'].read().decode())
 
-        print(f"Respuesta desde Lambda de perfil: {json.dumps(response_payload)}")
+        # Depuración: Imprimir la respuesta completa que se obtiene de la Lambda
+        print(f"Response from profile service: {json.dumps(response_payload)}")  # Depuración
 
-        # Verificar que la respuesta tenga statusCode 200
-        if response_payload.get("statusCode") != 200:
-            raise Exception(f"Error de la Lambda de perfil: {response_payload.get('body')}")
+        # Verificar que la respuesta tenga una clave 'body' que contenga la lista de cuentas
+        if 'body' not in response_payload:
+            raise Exception("No body found in response.")
 
-        # Obtener el cuerpo y asegurarse de que sea una lista
-        body = response_payload.get("body", "[]")
-        try:
-            accounts = json.loads(body)
-        except json.JSONDecodeError:
-            raise Exception("La respuesta en 'body' no es un JSON válido.")
+        # Obtener el contenido de 'body'
+        body = response_payload['body']
 
-        if not isinstance(accounts, list):
-            raise Exception("Se esperaba una lista de cuentas.")
+        # Si body es una cadena, convertirlo a un objeto JSON
+        if isinstance(body, str):
+            try:
+                body = json.loads(body)  # Convertirlo en un objeto JSON si es una cadena
+            except json.JSONDecodeError:
+                raise Exception("La respuesta en 'body' no es un JSON válido.")
 
-        if not accounts:
-            raise Exception("No se encontraron cuentas para el usuario.")
+        # Comprobar si body es un diccionario (en lugar de una lista)
+        if isinstance(body, dict):
+            body = [body]  # Convertir el diccionario a una lista que contenga ese diccionario
 
-        print(f"Cuentas recibidas: {json.dumps(accounts)}")
+        # Verificar que estamos obteniendo una lista de cuentas
+        if not isinstance(body, list):
+            raise Exception(f"Expected a list of accounts, but got {type(body)}")
 
-        # Buscar la cuenta correspondiente
-        account = next((acc for acc in accounts if acc.get('cuenta_id') == account_id), None)
+        # Verificar que tenemos cuentas
+        if not body:
+            raise Exception("No accounts found for the user.")
+
+        # Depuración: Imprimir las cuentas recibidas
+        print(f"Accounts: {json.dumps(body)}")  # Depuración
+
+        # Buscar la cuenta correspondiente por account_id
+        account = next((acc for acc in body if acc.get('cuenta_id') == account_id), None)
 
         if not account:
-            raise Exception(f"No se encontró la cuenta con ID {account_id}.")
+            raise Exception(f"Account with account_id {account_id} not found.")
 
-        # Obtener y convertir el saldo
+        # Obtener saldo como cadena
         amount = account.get('amount', '0')
-        return float(amount)
+
+        # Convertir el saldo a float antes de devolverlo
+        return float(amount)  # Retornar el saldo como float
 
     except Exception as e:
-        raise Exception(f"Error al obtener el saldo de la cuenta: {str(e)}")
-
+        raise Exception(f"Error fetching account balance: {str(e)}")
 
 def update_balance_in_profile(account_id, new_balance, token):
     """
@@ -229,3 +249,4 @@ def add_money_to_account_in_profile(account_id, user_id, amount, token):
 
     except Exception as e:
         raise Exception(f"Error al agregar dinero a la cuenta destino: {str(e)}")
+
