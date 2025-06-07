@@ -1,6 +1,13 @@
 import json
 from common import validate_token_and_get_user, fetch_rate_for_pair_from_exchange
 
+# Singleton para Lambda client (por si fetch_rate_for_pair_from_exchange lo usa internamente)
+def get_lambda_client():
+    if not hasattr(get_lambda_client, "_instance"):
+        import boto3
+        get_lambda_client._instance = boto3.client('lambda')
+    return get_lambda_client._instance
+
 def lambda_handler(event, context):
     try:
         # Obtener el token del encabezado de la solicitud
@@ -28,7 +35,6 @@ def lambda_handler(event, context):
         to_currency = to_currency.upper()
 
         # Llamada a la función Lambda para obtener la tasa de cambio
-        # Ahora pasamos el token en el Payload de la invocación
         rate = float(fetch_rate_for_pair_from_exchange(from_currency, to_currency, token))
 
         # Calcular la cantidad convertida

@@ -2,22 +2,23 @@ import boto3
 import os
 import json
 
+# Singleton para el cliente Lambda
+class LambdaClientSingleton:
+    _client = None
 
-# Recursos globales
-lambda_client = boto3.client('lambda')
+    @classmethod
+    def get_client(cls):
+        if cls._client is None:
+            cls._client = boto3.client('lambda')
+        return cls._client
 
 # Variables de entorno
 EXCHANGE_SERVICE_NAME = os.environ['EXCHANGE_SERVICE_NAME']
 PROFILE_SERVICE_NAME = os.environ['PROFILE_SERVICE_NAME']
 
 def validate_token_and_get_user(event):
-    """
-    Valida el token de autorización en el header 'Authorization' invocando la lambda validateToken.
-    Retorna user_id si es válido o lanza excepción en caso contrario.
-    """
-    # Obtener el token del encabezado
     token = event.get('headers', {}).get('Authorization')
-    print(f"Token extraído del encabezado: {token}")  # Registro para depuración
+    print(f"Token extraído del encabezado: {token}")
 
     if not token:
         return {
@@ -25,25 +26,20 @@ def validate_token_and_get_user(event):
             "body": json.dumps({"error": "Token no proporcionado"})
         }
 
-    # Llamada a la Lambda de validación de token
     validate_function_name = f"{os.environ['SERVICE_NAME']}-{os.environ['STAGE']}-{os.environ['VALIDATE_TOKEN_FUNCTION']}"
 
-    # Preparar la carga útil para invocar la función Lambda
     token_payload = {
         "body": json.dumps({"token": token})
     }
 
     try:
-        # Invocar la función Lambda que valida el token
-        response = lambda_client.invoke(
+        response = LambdaClientSingleton.get_client().invoke(
             FunctionName=validate_function_name,
             InvocationType='RequestResponse',
             Payload=json.dumps(token_payload)
         )
-        # Parsear la respuesta de la Lambda
         validation_result = json.loads(response['Payload'].read().decode())
-
-        print(f"Respuesta de validación del token: {validation_result}")  # Registro para depuración
+        print(f"Respuesta de validación del token: {validation_result}")
 
         if validation_result.get('statusCode') != 200:
             return {
@@ -51,47 +47,40 @@ def validate_token_and_get_user(event):
                 "body": validation_result.get('body')
             }
 
-        # Obtener el user_id del cuerpo de la respuesta
         user_info = json.loads(validation_result.get('body', '{}'))
         return user_info.get('user_id')
 
     except Exception as e:
-        print(f"Error al validar el token: {str(e)}")  # Registro para depuración
+        print(f"Error al validar el token: {str(e)}")
         return {
             "statusCode": 500,
             "body": json.dumps({"error": f"Error al validar el token: {str(e)}"})
         }
 
 def fetch_rate_for_pair_from_exchange(source, target, token):
-    """
-    Llama a la función Lambda del servicio de cambio de divisas para obtener la tasa de cambio entre dos monedas.
-    """
-    function_name = f"exchange-rate-api-{os.environ['STAGE']}-consultConversion"  # Nombre de la función Lambda que consulta las tasas
+    function_name = f"exchange-rate-api-{os.environ['STAGE']}-consultConversion"
     payload = {
         "pathParameters": {
             "from": source,
             "to": target
         },
         "headers": {
-            "Authorization": token  # Pasamos el token dentro del payload
+            "Authorization": token
         }
     }
 
     try:
-        # Invocar la función Lambda que devuelve la tasa de cambio
-        response = lambda_client.invoke(
+        response = LambdaClientSingleton.get_client().invoke(
             FunctionName=function_name,
-            InvocationType='RequestResponse',  # Llamada síncrona
-            Payload=json.dumps(payload)  # El token ahora está dentro del payload
+            InvocationType='RequestResponse',
+            Payload=json.dumps(payload)
         )
 
-        # Leer la respuesta
         response_payload = json.loads(response['Payload'].read().decode())
 
         if response_payload.get('statusCode') != 200:
             raise Exception(f"Error al obtener la tasa de cambio: {response_payload.get('body')}")
 
-        # Devolver la tasa de cambio
         data = json.loads(response_payload.get('body'))
         if "rate" not in data:
             raise Exception(f"Tasa de cambio no encontrada para {source}->{target}")
@@ -102,25 +91,18 @@ def fetch_rate_for_pair_from_exchange(source, target, token):
         raise Exception(f"Failed to fetch exchange rate via Lambda: {str(e)}")
 
 def get_account_balance_from_profile(user_id, account_id, token):
-    """
-    Llama a la Lambda del servicio de perfil para obtener las cuentas bancarias del usuario
-    y luego filtra la cuenta específica para obtener el saldo.
-    """
-    function_name = f"{PROFILE_SERVICE_NAME}-{os.environ['STAGE']}-listarCuentas"  # Función para listar las cuentas
+    function_name = f"{PROFILE_SERVICE_NAME}-{os.environ['STAGE']}-listarCuentas"
 
-    # Verificar que user_id y account_id no sean vacíos
     if not user_id or not account_id:
         raise Exception(f"Missing user_id or account_id. user_id: {user_id}, account_id: {account_id}")
 
-    # Preparar el payload para la invocación
     payload = {
         "pathParameters": {
-            "user_id": user_id  # Aquí pasamos el user_id en los path parameters correctamente
+            "user_id": user_id
         },
-        "body": json.dumps({"account_id": account_id})  # Puede incluir otros parámetros en el cuerpo si es necesario
+        "body": json.dumps({"account_id": account_id})
     }
 
-    # El token debe ir dentro del payload, no en los headers
     token_payload = {
         "pathParameters": payload["pathParameters"],
         "body": payload["body"],
@@ -128,73 +110,55 @@ def get_account_balance_from_profile(user_id, account_id, token):
     }
 
     try:
-        # Invocar la Lambda de cuentas
-        response = lambda_client.invoke(
+        response = LambdaClientSingleton.get_client().invoke(
             FunctionName=function_name,
             InvocationType='RequestResponse',
-            Payload=json.dumps(token_payload),  # Pasa el token en el payload
+            Payload=json.dumps(token_payload),
         )
 
-        # Parsear la respuesta de la Lambda
         response_payload = json.loads(response['Payload'].read().decode())
+        print(f"Response from profile service: {json.dumps(response_payload)}")
 
-        # Depuración: Imprimir la respuesta completa que se obtiene de la Lambda
-        print(f"Response from profile service: {json.dumps(response_payload)}")  # Depuración
-
-        # Verificar que la respuesta tenga una clave 'body' que contenga la lista de cuentas
         if 'body' not in response_payload:
             raise Exception("No body found in response.")
 
-        # Obtener el contenido de 'body'
         body = response_payload['body']
 
-        # Si body es una cadena, convertirlo a un objeto JSON
         if isinstance(body, str):
             try:
-                body = json.loads(body)  # Convertirlo en un objeto JSON si es una cadena
+                body = json.loads(body)
             except json.JSONDecodeError:
                 raise Exception("La respuesta en 'body' no es un JSON válido.")
 
-        # Comprobar si body es un diccionario (en lugar de una lista)
         if isinstance(body, dict):
-            body = [body]  # Convertir el diccionario a una lista que contenga ese diccionario
+            body = [body]
 
-        # Verificar que estamos obteniendo una lista de cuentas
         if not isinstance(body, list):
             raise Exception(f"Expected a list of accounts, but got {type(body)}")
 
-        # Verificar que tenemos cuentas
         if not body:
             raise Exception("No accounts found for the user.")
 
-        # Depuración: Imprimir las cuentas recibidas
-        print(f"Accounts: {json.dumps(body)}")  # Depuración
+        print(f"Accounts: {json.dumps(body)}")
 
-        # Buscar la cuenta correspondiente por account_id
         account = next((acc for acc in body if acc.get('cuenta_id') == account_id), None)
 
         if not account:
             raise Exception(f"Account with account_id {account_id} not found.")
 
-        # Obtener saldo como cadena
         amount = account.get('amount', '0')
 
-        # Convertir el saldo a float antes de devolverlo
-        return float(amount)  # Retornar el saldo como float
+        return float(amount)
 
     except Exception as e:
         raise Exception(f"Error fetching account balance: {str(e)}")
 
 def update_balance_in_profile(account_id, new_balance, token):
-    """
-    Actualiza el monto (amount) de una cuenta bancaria invocando la Lambda correspondiente.
-    Se pasa el nuevo monto como string, conforme lo espera el servicio Profile.
-    """
     function_name = f"{PROFILE_SERVICE_NAME}-{os.environ['STAGE']}-actualizarCuenta"
 
     payload = {
         "body": json.dumps({
-            "amount": str(new_balance)  # Enviamos el nuevo monto como string
+            "amount": str(new_balance)
         }),
         "pathParameters": {
             "cuenta_id": account_id
@@ -205,7 +169,7 @@ def update_balance_in_profile(account_id, new_balance, token):
     }
 
     try:
-        response = lambda_client.invoke(
+        response = LambdaClientSingleton.get_client().invoke(
             FunctionName=function_name,
             InvocationType='RequestResponse',
             Payload=json.dumps(payload),
@@ -217,20 +181,14 @@ def update_balance_in_profile(account_id, new_balance, token):
     except Exception as e:
         raise Exception(f"Error al actualizar el monto de la cuenta: {str(e)}")
 
-
-
 def add_money_to_account_in_profile(account_id, user_id, amount, token):
-    """
-    Agrega dinero a una cuenta bancaria invocando la Lambda `addMoneyToBankAccount`.
-    Esta función debe usarse para la cuenta destino en una transferencia.
-    """
     function_name = f"{PROFILE_SERVICE_NAME}-{os.environ['STAGE']}-addMoneyToBankAccount"
 
     payload = {
         "body": json.dumps({
             "usuario_id": user_id,
             "bankAccId": account_id,
-            "amount": str(amount)  # <- Actualizado aquí
+            "amount": str(amount)
         }),
         "headers": {
             "Authorization": token
@@ -238,7 +196,7 @@ def add_money_to_account_in_profile(account_id, user_id, amount, token):
     }
 
     try:
-        response = lambda_client.invoke(
+        response = LambdaClientSingleton.get_client().invoke(
             FunctionName=function_name,
             InvocationType='RequestResponse',
             Payload=json.dumps(payload),
@@ -250,14 +208,7 @@ def add_money_to_account_in_profile(account_id, user_id, amount, token):
     except Exception as e:
         raise Exception(f"Error al agregar dinero a la cuenta destino: {str(e)}")
 
-
 def call_get_currency_date_limit(token):
-    """
-    Llama a la función Lambda getCurrencyDateLimit para obtener la fecha límite de cambios de divisas.
-    Requiere el token de autenticación.
-    """
-    lambda_client = boto3.client('lambda')
-
     function_name = f"{os.environ['ADMIN_SERVICE_NAME']}-{os.environ['STAGE']}-getCurrencyDateLimit"
 
     payload = {
@@ -266,7 +217,7 @@ def call_get_currency_date_limit(token):
         }
     }
 
-    response = lambda_client.invoke(
+    response = LambdaClientSingleton.get_client().invoke(
         FunctionName=function_name,
         InvocationType='RequestResponse',
         Payload=json.dumps(payload)
@@ -275,19 +226,11 @@ def call_get_currency_date_limit(token):
     result = json.loads(response['Payload'].read())
 
     if result.get('statusCode') == 200:
-        return json.loads(result['body'])  # Devuelve el dict con config_id, user_id, date_limit
+        return json.loads(result['body'])
     else:
         raise Exception(f"Error al obtener currency date limit: {result.get('body')}")
 
-
-
 def call_get_currency_limit(token):
-    """
-    Llama a la función Lambda getCurrencyLimit para obtener el límite de monto permitido por transacción.
-    Requiere el token de autenticación.
-    """
-    lambda_client = boto3.client('lambda')
-
     function_name = f"{os.environ['ADMIN_SERVICE_NAME']}-{os.environ['STAGE']}-getCurrencyLimit"
 
     payload = {
@@ -296,7 +239,7 @@ def call_get_currency_limit(token):
         }
     }
 
-    response = lambda_client.invoke(
+    response = LambdaClientSingleton.get_client().invoke(
         FunctionName=function_name,
         InvocationType='RequestResponse',
         Payload=json.dumps(payload)
@@ -305,6 +248,6 @@ def call_get_currency_limit(token):
     result = json.loads(response['Payload'].read())
 
     if result.get('statusCode') == 200:
-        return json.loads(result['body'])  # Devuelve el dict con amount, config_id, user_id, currency_type
+        return json.loads(result['body'])
     else:
         raise Exception(f"Error al obtener currency limit: {result.get('body')}")

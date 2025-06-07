@@ -33,7 +33,7 @@ def lambda_handler(event, context):
         transactions = response.get('Items', [])
         filtered = [
             txn for txn in transactions
-            if start_date <= datetime.strptime(txn['timestamp'], '%Y-%m-%dT%H:%M:%S') <= end_date
+            if start_date <= datetime.fromisoformat(txn['timestamp']) <= end_date
         ]
 
         report_id = str(uuid.uuid4())
@@ -50,7 +50,6 @@ def lambda_handler(event, context):
 
     except Exception as e:
         return respond(500, {'error': str(e)})
-
 
 def respond(status_code, body):
     return {

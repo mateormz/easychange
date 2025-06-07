@@ -9,14 +9,25 @@ from common import (
     get_account_balance_from_profile,
     update_balance_in_profile,
     add_money_to_account_in_profile,
-    call_get_currency_date_limit,  # <-- Importa función para fecha límite
-    call_get_currency_limit        # <-- Importa función para límite de monto
+    call_get_currency_date_limit,
+    call_get_currency_limit
 )
 
-lambda_client = boto3.client('lambda')
-dynamodb = boto3.resource('dynamodb')
-table = dynamodb.Table(os.environ['USER_CONVERSIONS_TABLE'])
+# Singleton para Lambda client
+def get_lambda_client():
+    if not hasattr(get_lambda_client, "_instance"):
+        get_lambda_client._instance = boto3.client('lambda')
+    return get_lambda_client._instance
 
+# Singleton para DynamoDB resource
+def get_dynamodb_resource():
+    if not hasattr(get_dynamodb_resource, "_instance"):
+        get_dynamodb_resource._instance = boto3.resource('dynamodb')
+    return get_dynamodb_resource._instance
+
+lambda_client = get_lambda_client()
+dynamodb = get_dynamodb_resource()
+table = dynamodb.Table(os.environ['USER_CONVERSIONS_TABLE'])
 
 def lambda_handler(event, context):
     try:
@@ -44,7 +55,6 @@ def lambda_handler(event, context):
         to_currency = to_currency.upper()
         transfer_currency = from_currency != to_currency
 
-        # Validar fecha límite para cambio de divisas
         try:
             currency_date_limit_resp = call_get_currency_date_limit(token)
             date_limit_str = currency_date_limit_resp.get('date_limit')
@@ -56,7 +66,6 @@ def lambda_handler(event, context):
         except Exception as e:
             return respond(500, {'error': f'Error validating currency date limit: {str(e)}'})
 
-        # Validar límite máximo por transacción
         try:
             currency_limit_resp = call_get_currency_limit(token)
             max_amount_usd = float(currency_limit_resp.get('amount', 0))
@@ -64,7 +73,6 @@ def lambda_handler(event, context):
 
             amount_in_usd = amount
             if from_currency != 'USD':
-                # Obtener tasa de cambio para convertir amount a USD y comparar
                 rate_to_usd = float(fetch_rate_for_pair_from_exchange(from_currency, 'USD', token))
                 amount_in_usd = amount * rate_to_usd
 
@@ -99,16 +107,13 @@ def lambda_handler(event, context):
         new_from_balance = from_balance - amount
 
         try:
-            # Restar amount a la cuenta fuente
             update_balance_in_profile(from_account_id, new_from_balance, token)
 
-            # Sumar amount a la cuenta destino usando Lambda
             result = add_money_to_account_in_profile(to_account_id, to_user_id, converted_amount, token)
 
             if result.get('statusCode') != 200:
                 raise Exception(f"Failed to add money to destination account: {result.get('body')}")
 
-            # Guardar transacción en DynamoDB
             table.put_item(
                 Item={
                     'user_id': str(from_user_id),
@@ -141,7 +146,6 @@ def lambda_handler(event, context):
 
     except Exception as e:
         return respond(500, {'error': str(e)})
-
 
 def respond(status_code, body):
     return {
