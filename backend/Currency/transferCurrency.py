@@ -43,8 +43,8 @@ def lambda_handler(event, context):
         transfer_currency = from_currency != to_currency
 
         try:
-            from_balance = get_account_balance_from_profile(from_user_id, from_account_id, token)
-            to_balance = get_account_balance_from_profile(to_user_id, to_account_id, token)
+            from_balance = float(get_account_balance_from_profile(from_user_id, from_account_id, token))
+            to_balance = float(get_account_balance_from_profile(to_user_id, to_account_id, token))
         except Exception as e:
             return respond(500, {'error': f'Error fetching account balance: {str(e)}'})
 
