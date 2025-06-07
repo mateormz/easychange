@@ -10,7 +10,7 @@ provider:
   timeout: 29
   environment:
     TABLE_BANKACC: ${sls:stage}-profile-bank-accounts-table
-    TABLE_ALERTS: ${sls:stage}-profile-alerts-table  # ← ESTA LÍNEA
+    TABLE_ALERTS: ${sls:stage}-profile-alerts-table # ← ESTA LÍNEA
     STAGE: ${sls:stage}
     VALIDATE_TOKEN_FUNCTION: disdb-auth-api
 
@@ -27,7 +27,7 @@ functions:
     handler: listBankAccounts.lambda_handler
     events:
       - http:
-          path: profile/bankacc
+          path: profile/bankacc/user/{user_id}
           method: get
           cors: true
 
@@ -86,6 +86,13 @@ functions:
           method: delete
           cors: true
 
+  addMoneyToBankAccount:
+    handler: addMoneyToBankAccount.lambda_handler
+    events:
+      - http:
+          path: profile/bankacc/addmoney
+          method: post
+          cors: true
 
 resources:
   Resources:
@@ -102,9 +109,9 @@ resources:
             AttributeType: S
         KeySchema:
           - AttributeName: usuario_id
-            KeyType: HASH
+            KeyType: HASH # Partition key
           - AttributeName: cuenta_id
-            KeyType: RANGE
+            KeyType: RANGE # Sort key
         GlobalSecondaryIndexes:
           - IndexName: moneda-index
             KeySchema:
@@ -142,4 +149,3 @@ resources:
         BillingMode: PAY_PER_REQUEST
         PointInTimeRecoverySpecification:
           PointInTimeRecoveryEnabled: true
-

@@ -1,14 +1,15 @@
-import boto3
 import os
 import json
+from singleton import get_dynamodb  # Importar la función Singleton
 
 def lambda_handler(event, context):
     try:
         print("[INFO] Received event:", json.dumps(event, indent=2))
 
-        dynamodb = boto3.resource('dynamodb')
+        # Obtener instancia Singleton de DynamoDB
+        dynamodb = get_dynamodb()
 
-        # Load environment variables
+        # Cargar variables de entorno
         try:
             token_table_name = os.environ['TABLE_TOKENS']
             print("[INFO] Environment variables loaded successfully")
@@ -23,7 +24,7 @@ def lambda_handler(event, context):
 
         token_table = dynamodb.Table(token_table_name)
 
-        # Get token from header
+        # Obtener token del header
         token = event.get('headers', {}).get('Authorization')
         print(f"[DEBUG] Authorization token: {token}")
 
@@ -35,7 +36,7 @@ def lambda_handler(event, context):
                 'body': json.dumps({'error': 'Authorization token is missing'})
             }
 
-        # Check if token exists
+        # Verificar si el token existe
         print("[INFO] Checking if token exists in DynamoDB")
         get_response = token_table.get_item(Key={'token': token})
         print(f"[DEBUG] get_item response: {get_response}")
@@ -48,7 +49,7 @@ def lambda_handler(event, context):
                 'body': json.dumps({'error': 'Token not found or already invalidated'})
             }
 
-        # Delete token
+        # Eliminar el token
         print("[INFO] Deleting token from DynamoDB")
         token_table.delete_item(Key={'token': token})
 

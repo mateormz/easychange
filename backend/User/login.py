@@ -1,10 +1,10 @@
-import boto3
+import os
+import json
 import hashlib
 import uuid
 from datetime import datetime, timedelta
-import os
 from boto3.dynamodb.conditions import Key
-import json
+from singleton import get_dynamodb  #usamos el singleton
 
 def hash_password(password):
     return hashlib.sha256(password.encode()).hexdigest()
@@ -13,10 +13,10 @@ def lambda_handler(event, context):
     try:
         print("[INFO] Received event:", json.dumps(event, indent=2))
 
-        # Initialize DynamoDB
-        dynamodb = boto3.resource('dynamodb')
+        # Obtener instancia única de DynamoDB
+        dynamodb = get_dynamodb()
 
-        # Environment variables
+        # Variables de entorno
         try:
             user_table_name = os.environ['TABLE_USERS']
             token_table_name = os.environ['TABLE_TOKENS']
@@ -36,7 +36,7 @@ def lambda_handler(event, context):
         user_table = dynamodb.Table(user_table_name)
         token_table = dynamodb.Table(token_table_name)
 
-        # Parse request body
+        # Parse body
         if 'body' not in event or not event['body']:
             print("[WARNING] Request body is missing")
             return {
@@ -72,7 +72,7 @@ def lambda_handler(event, context):
         hashed_password = hash_password(password)
         print(f"[DEBUG] Hashed password: {hashed_password}")
 
-        # Query the user by email
+        # Buscar usuario por email
         print(f"[INFO] Querying user by email: {email}")
         response = user_table.query(
             IndexName=email_index,
@@ -100,14 +100,14 @@ def lambda_handler(event, context):
 
         user_id = user['user_id']
 
-        # Generate token
+        # Generar token
         token = str(uuid.uuid4())
         expiration = (datetime.now() + timedelta(hours=1)).strftime('%Y-%m-%d %H:%M:%S')
 
         print(f"[INFO] Token generated: {token}")
         print(f"[DEBUG] Token expiration: {expiration}")
 
-        # Save token in DB
+        # Guardar token
         print("[INFO] Storing token in DynamoDB")
         token_table.put_item(
             Item={
