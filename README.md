@@ -44,10 +44,17 @@ easychange/
 ├── README.md
 
 
-## 📚 Documentación de Endpoints
+## 📬 Colecciones Postman - Cambio de Monedas
 
-Puedes acceder a la colección Postman completa aquí:  
-👉 [Documentación de la API](https://www.postman.com/atrapagemas/easychange)
+Puedes importar estas colecciones en [Postman](https://www.postman.com/) para probar los endpoints desarrollados en el proyecto. Las colecciones están en la carpeta `backend/postman_requests/`.
+
+### 🔗 Archivos disponibles:
+
+- [ADMIN.postman_collection.json]
+- [Currency.postman_collection.json]
+- [EXCHANGE.postman_collection.json]
+- [Profile.postman_collection.json]
+- [User.postman_collection.json]
 
 ## ⚙️ Configuración
 
