@@ -46,7 +46,7 @@ easychange/
 
 ## 📬 Colecciones Postman - Cambio de Monedas
 
-Puedes importar estas colecciones en [Postman](https://www.postman.com/) para probar los endpoints desarrollados en el proyecto.
+Puedes importar estas colecciones en [Postman](https://www.postman.com/) para probar los endpoints desarrollados en el proyecto. Las colecciones están en la carpeta `postman_requests/`.
 
 ### 🔗 Archivos disponibles:
 
