@@ -1,0 +1,305 @@
+{
+	"info": {
+		"_postman_id": "6964dac8-d74b-4d16-ba25-4064a7d80c27",
+		"name": "User",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "33952836",
+		"_collection_link": "https://atrapagemas.postman.co/workspace/EasyChange~fe138b3a-4c16-4432-b310-beea9f6aa7f7/collection/33952836-6964dac8-d74b-4d16-ba25-4064a7d80c27?action=share&source=collection_link&creator=33952836"
+	},
+	"item": [
+		{
+			"name": "register",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const jsonData = pm.response.json();",
+							"",
+							"// Guardar token correctamente",
+							"pm.environment.set(\"auth_token\", jsonData.token);",
+							"",
+							"// Guardar user_id correctamente",
+							"pm.environment.set(\"user_id\", jsonData.user_id);",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"email\": \"mateo@gmail.com\",\r\n  \"password\": \"1234\",\r\n  \"name\": \"Mateo\",\r\n  \"lastName\": \"Ramírez\",\r\n  \"phoneNumber\": \"123456789\",\r\n  \"dni\": \"123456789\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/{{stage}}/auth/register",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"{{stage}}",
+						"auth",
+						"register"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "validateToken",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"token\": \"{{auth_token}}\"\r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/{{stage}}/token/validate",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"{{stage}}",
+						"token",
+						"validate"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "login",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const jsonData = pm.response.json();",
+							"",
+							"// Guardar token correctamente",
+							"pm.environment.set(\"auth_token\", jsonData.token);",
+							"",
+							"// Guardar user_id correctamente",
+							"pm.environment.set(\"user_id\", jsonData.user_id);",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"email\": \"mateo@gmail.com\",\r\n  \"password\": \"1234\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/{{stage}}/auth/login",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"{{stage}}",
+						"auth",
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "getUserById",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{auth_token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{base_url}}/{{stage}}/auth/users/get/{{user_id}}",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"{{stage}}",
+						"auth",
+						"users",
+						"get",
+						"{{user_id}}"
+					],
+					"query": [
+						{
+							"key": "",
+							"value": null,
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "updateUser",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{auth_token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"email\": \"mateo2@gmail.com\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/{{stage}}/auth/users/update/{{user_id}}",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"{{stage}}",
+						"auth",
+						"users",
+						"update",
+						"{{user_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "deleteUser",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{auth_token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{base_url}}/{{stage}}/auth/users/delete/{{user_id}}",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"{{stage}}",
+						"auth",
+						"users",
+						"delete",
+						"{{user_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "logout",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{auth_token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{base_url}}/{{stage}}/auth/logout",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"{{stage}}",
+						"auth",
+						"logout"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "https://2qofjdh094.execute-api.us-east-1.amazonaws.com",
+			"type": "string"
+		}
+	]
+}

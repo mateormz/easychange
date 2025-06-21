@@ -1,0 +1,149 @@
+{
+	"info": {
+		"_postman_id": "9d8deebe-d6e1-4246-aef7-412f51427885",
+		"name": "ADMIN",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "33952836",
+		"_collection_link": "https://atrapagemas.postman.co/workspace/EasyChange~fe138b3a-4c16-4432-b310-beea9f6aa7f7/collection/33952836-9d8deebe-d6e1-4246-aef7-412f51427885?action=share&source=collection_link&creator=33952836"
+	},
+	"item": [
+		{
+			"name": "Set Currency Limit (PUT)",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "368089ae-5517-4ec6-9bc4-c826587d4436",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"amount\": \"10000\",\r\n    \"currency_type\": \"USD\"\r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://8z25bntdy2.execute-api.us-east-1.amazonaws.com/dev/admin/currency-limit",
+					"protocol": "https",
+					"host": [
+						"8z25bntdy2",
+						"execute-api",
+						"us-east-1",
+						"amazonaws",
+						"com"
+					],
+					"path": [
+						"dev",
+						"admin",
+						"currency-limit"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Set Currency Date Limit (PUT)",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "368089ae-5517-4ec6-9bc4-c826587d4436",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"date_limit\": \"2025-12-31T23:59:59\"\r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://8z25bntdy2.execute-api.us-east-1.amazonaws.com/dev/admin/currency-date-limit",
+					"protocol": "https",
+					"host": [
+						"8z25bntdy2",
+						"execute-api",
+						"us-east-1",
+						"amazonaws",
+						"com"
+					],
+					"path": [
+						"dev",
+						"admin",
+						"currency-date-limit"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Currency Date Limit (GET)",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "368089ae-5517-4ec6-9bc4-c826587d4436",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "https://8z25bntdy2.execute-api.us-east-1.amazonaws.com/dev/admin/currency-date-limit",
+					"protocol": "https",
+					"host": [
+						"8z25bntdy2",
+						"execute-api",
+						"us-east-1",
+						"amazonaws",
+						"com"
+					],
+					"path": [
+						"dev",
+						"admin",
+						"currency-date-limit"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Currency Limit (GET)",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "368089ae-5517-4ec6-9bc4-c826587d4436",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "https://8z25bntdy2.execute-api.us-east-1.amazonaws.com/dev/admin/currency-limit",
+					"protocol": "https",
+					"host": [
+						"8z25bntdy2",
+						"execute-api",
+						"us-east-1",
+						"amazonaws",
+						"com"
+					],
+					"path": [
+						"dev",
+						"admin",
+						"currency-limit"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

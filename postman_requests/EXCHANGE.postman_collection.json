@@ -1,0 +1,257 @@
+{
+	"info": {
+		"_postman_id": "c552c56c-c60b-41fd-83ad-05c93dad6548",
+		"name": "EXCHANGE",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "33952836",
+		"_collection_link": "https://atrapagemas.postman.co/workspace/EasyChange~fe138b3a-4c16-4432-b310-beea9f6aa7f7/collection/34047895-c552c56c-c60b-41fd-83ad-05c93dad6548?action=share&source=collection_link&creator=33952836"
+	},
+	"item": [
+		{
+			"name": "create-exchangerates",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "368089ae-5517-4ec6-9bc4-c826587d4436",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"from\": \"PEN\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://fm80rh9h9g.execute-api.us-east-1.amazonaws.com/dev/exchange-rate/create",
+					"protocol": "https",
+					"host": [
+						"fm80rh9h9g",
+						"execute-api",
+						"us-east-1",
+						"amazonaws",
+						"com"
+					],
+					"path": [
+						"dev",
+						"exchange-rate",
+						"create"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "consult-conversion",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "e13f6098-8c05-487e-99dd-2977876920ec",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://fm80rh9h9g.execute-api.us-east-1.amazonaws.com/dev/exchange-rate/EUR/USD",
+					"protocol": "https",
+					"host": [
+						"fm80rh9h9g",
+						"execute-api",
+						"us-east-1",
+						"amazonaws",
+						"com"
+					],
+					"path": [
+						"dev",
+						"exchange-rate",
+						"EUR",
+						"USD"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "update-singlerate",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "e13f6098-8c05-487e-99dd-2977876920ec",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://fm80rh9h9g.execute-api.us-east-1.amazonaws.com/dev/exchange-rate/EUR/USD",
+					"protocol": "https",
+					"host": [
+						"fm80rh9h9g",
+						"execute-api",
+						"us-east-1",
+						"amazonaws",
+						"com"
+					],
+					"path": [
+						"dev",
+						"exchange-rate",
+						"EUR",
+						"USD"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "update-exchangerates",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "854fe581-f4b1-45f4-8652-80d35a829854",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"from\": \"PEN\"\r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://fm80rh9h9g.execute-api.us-east-1.amazonaws.com/dev/exchange-rate/update",
+					"protocol": "https",
+					"host": [
+						"fm80rh9h9g",
+						"execute-api",
+						"us-east-1",
+						"amazonaws",
+						"com"
+					],
+					"path": [
+						"dev",
+						"exchange-rate",
+						"update"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "delete-exchangerate",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "854fe581-f4b1-45f4-8652-80d35a829854",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://fm80rh9h9g.execute-api.us-east-1.amazonaws.com/dev/exchange-rate/PEN/USD",
+					"protocol": "https",
+					"host": [
+						"fm80rh9h9g",
+						"execute-api",
+						"us-east-1",
+						"amazonaws",
+						"com"
+					],
+					"path": [
+						"dev",
+						"exchange-rate",
+						"PEN",
+						"USD"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

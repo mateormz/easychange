@@ -1,0 +1,458 @@
+{
+	"info": {
+		"_postman_id": "5039a43f-3a20-424d-86b1-a429b96f1cfa",
+		"name": "Profile",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "33952836",
+		"_collection_link": "https://atrapagemas.postman.co/workspace/EasyChange~fe138b3a-4c16-4432-b310-beea9f6aa7f7/collection/33952836-5039a43f-3a20-424d-86b1-a429b96f1cfa?action=share&source=collection_link&creator=33952836"
+	},
+	"item": [
+		{
+			"name": "bankacc",
+			"item": [
+				{
+					"name": "create-bankacc",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const jsonData = pm.response.json();",
+									"pm.collectionVariables.set(\"bank_acc_id\", jsonData.cuenta_id);",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "90fda55a-cb85-48c0-b421-38dd952aee2b",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"banco\": \"BCP\",\n  \"moneda\": \"USD\",\n  \"numero_cuenta\": \"0021234445678401334167\",\n  \"tipo_cuenta\": \"banco\",\n  \"alias\": \"Ahorros BCP\",\n  \"amount\": 2000\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://gfajrm6esi.execute-api.us-east-1.amazonaws.com/dev/profile/bankacc",
+							"protocol": "https",
+							"host": [
+								"gfajrm6esi",
+								"execute-api",
+								"us-east-1",
+								"amazonaws",
+								"com"
+							],
+							"path": [
+								"dev",
+								"profile",
+								"bankacc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get-mybankacc",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "08ff088d-b381-47b3-9497-f1b077c88275",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "https://gfajrm6esi.execute-api.us-east-1.amazonaws.com/dev/profile/bankacc/user/75359223-9d0a-48c0-8dfe-f6b68d600560",
+							"protocol": "https",
+							"host": [
+								"gfajrm6esi",
+								"execute-api",
+								"us-east-1",
+								"amazonaws",
+								"com"
+							],
+							"path": [
+								"dev",
+								"profile",
+								"bankacc",
+								"user",
+								"75359223-9d0a-48c0-8dfe-f6b68d600560"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update-bankacc",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "64d9a125-2de1-427d-a800-eac4055db1e8",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"saldo\": \"200\"\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://gfajrm6esi.execute-api.us-east-1.amazonaws.com/dev/profile/bankacc/",
+							"protocol": "https",
+							"host": [
+								"gfajrm6esi",
+								"execute-api",
+								"us-east-1",
+								"amazonaws",
+								"com"
+							],
+							"path": [
+								"dev",
+								"profile",
+								"bankacc",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get-mybankaccs_currency",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{auth_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/{{stage}}/profile/bankacc/moneda/{{currency}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"{{stage}}",
+								"profile",
+								"bankacc",
+								"moneda",
+								"{{currency}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete-bankacc",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{auth_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "https://gfajrm6esi.execute-api.us-east-1.amazonaws.com/dev/profile/bankacc/{cuenta_id}",
+							"protocol": "https",
+							"host": [
+								"gfajrm6esi",
+								"execute-api",
+								"us-east-1",
+								"amazonaws",
+								"com"
+							],
+							"path": [
+								"dev",
+								"profile",
+								"bankacc",
+								"{cuenta_id}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update_bankacc2",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "5bd6b5c5-0cc9-4728-aed2-cec620f558ad",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"usuario_id\": \"d287674e-ad2d-4866-9285-0f815a540bbc\",       // The user ID of the account holder\r\n  \"bankAccId\": \"122003a2-28d5-469e-936a-c6a21e01ae84\",  // The bank account ID\r\n  \"transfered_money\": \"20\"         // The amount to be added\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://gfajrm6esi.execute-api.us-east-1.amazonaws.com/dev/profile/bankacc/addmoney",
+							"protocol": "https",
+							"host": [
+								"gfajrm6esi",
+								"execute-api",
+								"us-east-1",
+								"amazonaws",
+								"com"
+							],
+							"path": [
+								"dev",
+								"profile",
+								"bankacc",
+								"addmoney"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "alert",
+			"item": [
+				{
+					"name": "create-alert",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const jsonData = pm.response.json();",
+									"pm.collectionVariables.set(\"alert_id\", jsonData.alerta_id);",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{auth_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"tipo_cambio\": \"USD/PEN\",\n  \"umbral\": 3.85,\n  \"direccion\": \"mayor_igual\"\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/{{stage}}/profile/alerts",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"{{stage}}",
+								"profile",
+								"alerts"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get-myalerts",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{auth_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/{{stage}}/profile/alerts",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"{{stage}}",
+								"profile",
+								"alerts"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update-alert",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{auth_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"umbral\": 3.90,\n  \"direccion\": \"menor_igual\"\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/{{stage}}/profile/alerts/{{alert_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"{{stage}}",
+								"profile",
+								"alerts",
+								"{{alert_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete-alert",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{auth_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/{{stage}}/profile/alerts/{{alert_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"{{stage}}",
+								"profile",
+								"alerts",
+								"{{alert_id}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "bank_acc_id",
+			"value": ""
+		},
+		{
+			"key": "currency",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "alert_id",
+			"value": "",
+			"type": "string"
+		}
+	]
+}

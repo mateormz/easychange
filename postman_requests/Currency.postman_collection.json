@@ -1,0 +1,148 @@
+{
+	"info": {
+		"_postman_id": "17e2e06a-0531-403c-9e5a-1a9c55544e85",
+		"name": "Currency",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "33952836",
+		"_collection_link": "https://atrapagemas.postman.co/workspace/EasyChange~fe138b3a-4c16-4432-b310-beea9f6aa7f7/collection/33952836-17e2e06a-0531-403c-9e5a-1a9c55544e85?action=share&source=collection_link&creator=33952836"
+	},
+	"item": [
+		{
+			"name": "ConvertCurrency",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "08ff088d-b381-47b3-9497-f1b077c88275",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"fromCurrency\": \"PEN\",\r\n  \"toCurrency\": \"CLP\",\r\n  \"amount\": 100\r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://ssmt3bt4xf.execute-api.us-east-1.amazonaws.com/dev/convertCurrency",
+					"protocol": "https",
+					"host": [
+						"ssmt3bt4xf",
+						"execute-api",
+						"us-east-1",
+						"amazonaws",
+						"com"
+					],
+					"path": [
+						"dev",
+						"convertCurrency"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GetConvertCurrency",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "08ff088d-b381-47b3-9497-f1b077c88275",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "https://ssmt3bt4xf.execute-api.us-east-1.amazonaws.com/dev/getCurrencyConversionByUserId",
+					"protocol": "https",
+					"host": [
+						"ssmt3bt4xf",
+						"execute-api",
+						"us-east-1",
+						"amazonaws",
+						"com"
+					],
+					"path": [
+						"dev",
+						"getCurrencyConversionByUserId"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Transfer",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "08ff088d-b381-47b3-9497-f1b077c88275",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"fromUserId\": \"75359223-9d0a-48c0-8dfe-f6b68d600560\",  \r\n  \"toUserId\": \"9d187e25-f566-4677-9939-23e55feefdc6\",    \r\n  \"fromAccountId\": \"8e6170e6-3182-4042-8368-0d9120b3ae64\",  \r\n  \"toAccountId\": \"400780c2-8d2c-4acf-870d-17f575441d8d\",    \r\n  \"amount\": 10,              \r\n  \"fromCurrency\": \"USD\",         \r\n  \"toCurrency\": \"PEN\"                \r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://ssmt3bt4xf.execute-api.us-east-1.amazonaws.com/dev/transferCurrency",
+					"protocol": "https",
+					"host": [
+						"ssmt3bt4xf",
+						"execute-api",
+						"us-east-1",
+						"amazonaws",
+						"com"
+					],
+					"path": [
+						"dev",
+						"transferCurrency"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Report",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"startDate\": \"2024-01-01\",\r\n  \"endDate\": \"2024-12-31\"\r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://ssmt3bt4xf.execute-api.us-east-1.amazonaws.com/dev/createReport",
+					"protocol": "https",
+					"host": [
+						"ssmt3bt4xf",
+						"execute-api",
+						"us-east-1",
+						"amazonaws",
+						"com"
+					],
+					"path": [
+						"dev",
+						"createReport"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
