@@ -20,10 +20,10 @@ class ExchangeRateAPI:
         return cls._instance
 
     def get_api_url(self):
-        return self.api_url
+        return self.api_url #linea 23
 
     def get_api_key(self):
-        return self.api_key
+        return self.api_key #linea 26
 
     def fetch_rate_for_pair(self, source, target):
         """
@@ -99,7 +99,7 @@ def validate_token_and_get_user(event):
     """
     token = event.get('headers', {}).get('Authorization')
     if not token:
-        raise Exception("Authorization token is missing")
+        raise Exception("Authorization token is missing") #linea 102
 
     lambda_client = boto3.client('lambda')
     validate_function_name = f"{os.environ['SERVICE_NAME']}-{os.environ['STAGE']}-{os.environ['VALIDATE_TOKEN_FUNCTION']}"
@@ -113,7 +113,7 @@ def validate_token_and_get_user(event):
     validation_result = json.loads(response['Payload'].read())
 
     if validation_result.get('statusCode') != 200:
-        raise Exception("Unauthorized - Invalid or expired token")
+        raise Exception("Unauthorized - Invalid or expired token") #linea 116
 
     user_info = json.loads(validation_result.get('body', '{}'))
     return user_info.get('user_id')
@@ -128,7 +128,7 @@ def save_rates_to_db(quotes, timestamp):
         source = key[:3]
         break
     if source is None:
-        raise Exception("Could not determine source currency")
+        raise Exception("Could not determine source currency") # linea 131
 
     # Borra tasas antiguas
     delete_rates_by_source(source)
