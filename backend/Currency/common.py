@@ -251,3 +251,5 @@ def call_get_currency_limit(token):
         return json.loads(result['body'])
     else:
         raise Exception(f"Error al obtener currency limit: {result.get('body')}")
+
+    
