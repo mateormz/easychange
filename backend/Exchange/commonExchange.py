@@ -27,37 +27,28 @@ class ExchangeRateAPI:
         return self.api_key
 
     def fetch_rate_for_pair(self, source, target):
-        """
-        Devuelve un valor constante de la tasa de cambio para cualquier par de monedas
-        sin realizar ninguna llamada a la API externa. Funciona como un mock.
-        """
-        time.sleep(0.5)  # Simulamos un retraso de 500 ms, como en una llamada real
 
-        # Tasa fija simulada (puede ser cualquier valor constante)
-        fixed_rate = '3.75'  # Tasa fija de cambio para todos los pares de monedas
-        fixed_timestamp = 1640995200  # Timestamp de ejemplo (2022-01-01)
+        time.sleep(0.5)  # 500 ms
 
-        # Simulamos que devolvemos el valor como si lo hubiéramos obtenido de la API externa
+        # Tasa fija simulada
+        fixed_rate = '3.75'
+        fixed_timestamp = 1640995200
+
         return fixed_rate, fixed_timestamp
 
 
     def fetch_rates_for_source(self, source):
-        """
-        Devuelve todas las tasas de cambio fijas para un `source` sin llamar a la API externa.
-        Funcionando como un mock.
-        """
-        time.sleep(0.5)  # Simulamos un retraso de 500 ms, como en una llamada real
 
-        # Tasas fijas simuladas para cualquier par de divisas desde `source`
+        time.sleep(0.5)  #500 ms
+
         fixed_rates = {
-            'USDUSD': '1.00',  # Valor ficticio para el par USD/USD
-            'USDEUR': '0.84',  # Valor ficticio para el par USD/EUR
-            'USDJPY': '110.45', # Valor ficticio para el par USD/JPY
-            'USDPEN': '3.75',  # Valor ficticio para el par USD/PEN (simulando una tasa fija)
+            'USDUSD': '1.00',
+            'USDEUR': '0.84',
+            'USDJPY': '110.45',
+            'USDPEN': '3.75',
         }
-        fixed_timestamp = 1640995200  # Timestamp de ejemplo (2022-01-01)
+        fixed_timestamp = 1640995200
 
-        # Simulamos que devolvemos las tasas como si las hubiéramos obtenido de la API externa
         return fixed_rates, fixed_timestamp
 
 

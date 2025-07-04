@@ -23,11 +23,11 @@ def lambda_handler(event, context):
             'JPYNZD': '1.40',  # JPY a NZD
         }
 
-        # Usa DynamoDBConnection Singleton para obtener la referencia a la tabla
+        # Usa DynamoDBConnection
         db_connection = DynamoDBConnection()
         table = db_connection.get_table()
 
-        # Combinamos las dos monedas en un string para que sea más fácil buscar
+        # Combinamos las dos monedas
         currency_pair = from_currency + to_currency
 
         # Verificamos si el par está en el diccionario
@@ -35,13 +35,11 @@ def lambda_handler(event, context):
             rate = fixed_rates[currency_pair]
             timestamp = int(time.time())  # Timestamp actual
         else:
-            # Si el par no está en el diccionario, podemos devolver una tasa predeterminada
-            # O bien, se puede buscar en la base de datos (si fuera necesario)
+
             rate = '1.00'  # Tasa predeterminada
-            timestamp = int(time.time())  # Timestamp actual
+            timestamp = int(time.time())
             save_rate_to_db(from_currency, to_currency, rate, timestamp)
 
-        # Guardar la tasa en la base de datos (si no estaba previamente)
         save_rate_to_db(from_currency, to_currency, rate, timestamp)
 
         # Respuesta de la API
