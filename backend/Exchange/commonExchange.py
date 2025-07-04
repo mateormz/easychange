@@ -27,6 +27,26 @@ class ExchangeRateAPI:
     def get_api_key(self):
         return self.api_key
 
+    def fetch_rate_for_pair(self, source, target):
+        """
+        Obtiene la tasa puntual de cambio entre source y target desde la API externa.
+        """
+        params = {
+            'access_key': self.api_key,
+            'source': source,
+            'currencies': target
+        }
+        url = f"{self.api_url}/live?" + urllib.parse.urlencode(params)
+        with urllib.request.urlopen(url) as response:
+            data = json.loads(response.read().decode())
+        if not data.get('success'):
+            raise Exception(f"API error: {data}")
+        quotes = data['quotes']
+        key = source + target
+        if key not in quotes:
+            raise Exception(f"Rate not found for {source}->{target}")
+        return str(quotes[key]), data['timestamp']  # guardamos como string
+
     def fetch_rates_for_source(self, source):
         """
         Obtiene todas las tasas de cambio desde 'source' usando la API externa.
@@ -47,21 +67,42 @@ class ExchangeRateAPI:
 
 
 # Función de prueba con mockeo
-@patch('commonExchange.ExchangeRateAPI.fetch_rate_for_pair', return_value=('3.75', 'timestamp'))
-def test_currency_conversion():
-    # Esta función ahora devolverá 3.75 como tasa de cambio en lugar de hacer una llamada real
-    # Aquí puedes realizar el test donde necesites esa tasa de cambio fija
+def run_mock_test():
+    """
+    Ejecuta el test con mock solo si es necesario.
+    """
+    if os.environ.get('RUN_TESTS', 'false').lower() == 'true':
+        print("[INFO] Ejecutando test con mock...")
+        test_currency_conversion()
+    else:
+        print("[INFO] Test omitido - RUN_TESTS no está habilitado")
 
+
+@patch('commonExchange.ExchangeRateAPI.fetch_rate_for_pair')
+def test_currency_conversion(mock_fetch_rate):
+    """
+    Test mockeado para el método fetch_rate_for_pair.
+    """
+    # Configurar el mock para que retorne valores específicos
+    mock_fetch_rate.return_value = ('3.75', 1640995200)  # timestamp de ejemplo
+
+    # Crear instancia y probar
     exchange_api = ExchangeRateAPI()
     rate, timestamp = exchange_api.fetch_rate_for_pair('USD', 'EUR')
 
-    # Comprobamos si la tasa de cambio es la mockeada, que debe ser 3.75
+    # Verificar que el mock funcionó correctamente
     assert rate == '3.75'
-    print(f'Tasa de cambio mockeada: {rate}, Timestamp: {timestamp}')
+    assert timestamp == 1640995200
+
+    # Verificar que el método fue llamado con los parámetros correctos
+    mock_fetch_rate.assert_called_once_with('USD', 'EUR')
+
+    print(f'[TEST] ✅ Mock test exitoso - Tasa: {rate}, Timestamp: {timestamp}')
+    print(f'[TEST] ✅ Método llamado con parámetros correctos')
 
 
-# Llamada a la función de prueba
-test_currency_conversion()
+# Ejecutar test solo si está habilitado
+run_mock_test()
 
 
 # Singleton para la conexión a DynamoDB

@@ -4,7 +4,13 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="44809d59-ca6a-4b6e-81af-b08bf8f5e825" name="Changes" comment="Hoy54" />
+    <list default="true" id="44809d59-ca6a-4b6e-81af-b08bf8f5e825" name="Changes" comment="Hoy54">
+      <change beforePath="$PROJECT_DIR$/.idea/easychange.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/easychange.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/Exchange/commonExchange.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/Exchange/commonExchange.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/Exchange/serverless.yml" beforeDir="false" afterPath="$PROJECT_DIR$/backend/Exchange/serverless.yml" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -32,12 +38,12 @@
     &quot;assignee&quot;: &quot;Luis23345432&quot;
   }
 }</component>
-  <component name="GithubPullRequestsUISettings">{
-  &quot;selectedUrlAndAccountId&quot;: {
-    &quot;url&quot;: &quot;https://github.com/mateormz/easychange.git&quot;,
-    &quot;accountId&quot;: &quot;d83dbe06-da0f-45b6-9638-61eeeacd99ad&quot;
+  <component name="GithubPullRequestsUISettings"><![CDATA[{
+  "selectedUrlAndAccountId": {
+    "url": "https://github.com/mateormz/easychange.git",
+    "accountId": "84ffe58d-4c82-4cc8-bd69-8bd03ef80073"
   }
-}</component>
+}]]></component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 3
 }</component>
@@ -46,22 +52,22 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;ASKED_SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;dev-5&quot;,
-    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/LUIS FERNANDO/UTEC_2024_CICLO2/Cloud/easychange/backend/Currency&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ASKED_SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "git-widget-placeholder": "mock",
+    "ignore.virus.scanning.warn.message": "true",
+    "last_opened_file_path": "C:/Users/LUIS FERNANDO/UTEC_2024_CICLO2/Cloud/easychange/backend/Currency",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\LUIS FERNANDO\UTEC_2024_CICLO2\Cloud\easychange\backend\Currency" />
@@ -92,14 +98,8 @@
       <workItem from="1749134644336" duration="34219000" />
       <workItem from="1749267045673" duration="17389000" />
       <workItem from="1749309468270" duration="1897000" />
-    </task>
-    <task id="LOCAL-00030" summary="Hoy53">
-      <option name="closed" value="true" />
-      <created>1749139087786</created>
-      <option name="number" value="00030" />
-      <option name="presentableId" value="LOCAL-00030" />
-      <option name="project" value="LOCAL" />
-      <updated>1749139087786</updated>
+      <workItem from="1751508064077" duration="5353000" />
+      <workItem from="1751589109432" duration="4727000" />
     </task>
     <task id="LOCAL-00031" summary="Hoy53">
       <option name="closed" value="true" />
@@ -485,7 +485,15 @@
       <option name="project" value="LOCAL" />
       <updated>1749310731247</updated>
     </task>
-    <option name="localTasksCounter" value="79" />
+    <task id="LOCAL-00079" summary="Hoy54">
+      <option name="closed" value="true" />
+      <created>1751592146516</created>
+      <option name="number" value="00079" />
+      <option name="presentableId" value="LOCAL-00079" />
+      <option name="project" value="LOCAL" />
+      <updated>1751592146517</updated>
+    </task>
+    <option name="localTasksCounter" value="80" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
