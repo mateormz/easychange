@@ -1,10 +1,10 @@
 import boto3
 import os
-import uuid
 import json
 import time
 from commonExchange import validate_token_and_get_user, get_rate_from_db, save_rate_to_db
 from commonExchange import ExchangeRateAPI, DynamoDBConnection  # Importa los Singleton
+
 
 def lambda_handler(event, context):
     try:
@@ -13,38 +13,48 @@ def lambda_handler(event, context):
         from_currency = event['pathParameters']['from'].upper()
         to_currency = event['pathParameters']['to'].upper()
 
+        # Diccionario con tasas de cambio personalizadas
+        fixed_rates = {
+            'USDEUR': '0.84',  # USD a EUR
+            'EURUSD': '1.19',  # EUR a USD
+            'USDPEN': '3.75',  # USD a PEN
+            'PENUSD': '0.27',  # PEN a USD
+            'USDJPY': '110.45',  # USD a JPY
+            'JPYNZD': '1.40',  # JPY a NZD
+        }
+
         # Usa DynamoDBConnection Singleton para obtener la referencia a la tabla
         db_connection = DynamoDBConnection()
         table = db_connection.get_table()
 
-        # Intenta obtener la tasa de la base de datos
-        record = get_rate_from_db(from_currency, to_currency)
-        now = int(time.time())
+        # Combinamos las dos monedas en un string para que sea más fácil buscar
+        currency_pair = from_currency + to_currency
 
-        # Si la tasa está en la base de datos
-        if record:
-            # Si el TTL ya ha expirado, realiza una nueva consulta a la API externa
-            if now > record['ttl']:
-                # Usa ExchangeRateAPI Singleton para consultar la API externa
-                exchange_api = ExchangeRateAPI()  # Instancia del Singleton
-                rate, timestamp = exchange_api.fetch_rate_for_pair(from_currency, to_currency)
-                save_rate_to_db(from_currency, to_currency, rate, timestamp)
-            else:
-                rate = record['rate']
+        # Verificamos si el par está en el diccionario
+        if currency_pair in fixed_rates:
+            rate = fixed_rates[currency_pair]
+            timestamp = int(time.time())  # Timestamp actual
         else:
-            # Si no hay registro, realiza la consulta a la API externa
-            exchange_api = ExchangeRateAPI()  # Instancia del Singleton
-            rate, timestamp = exchange_api.fetch_rate_for_pair(from_currency, to_currency)
+            # Si el par no está en el diccionario, podemos devolver una tasa predeterminada
+            # O bien, se puede buscar en la base de datos (si fuera necesario)
+            rate = '1.00'  # Tasa predeterminada
+            timestamp = int(time.time())  # Timestamp actual
             save_rate_to_db(from_currency, to_currency, rate, timestamp)
 
+        # Guardar la tasa en la base de datos (si no estaba previamente)
+        save_rate_to_db(from_currency, to_currency, rate, timestamp)
+
+        # Respuesta de la API
         return respond(200, {
             'from': from_currency,
             'to': to_currency,
             'rate': rate,
             'user_id': user_id
         })
+
     except Exception as e:
         return respond(500, {'error': str(e)})
+
 
 def respond(status_code, body):
     return {

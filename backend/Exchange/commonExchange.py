@@ -5,6 +5,7 @@ import time
 import urllib.request
 import urllib.parse
 
+
 # Singleton para la configuración de la API externa (URL y API Key)
 class ExchangeRateAPI:
     _instance = None
@@ -27,41 +28,37 @@ class ExchangeRateAPI:
 
     def fetch_rate_for_pair(self, source, target):
         """
-        Obtiene la tasa puntual de cambio entre source y target desde la API externa.
+        Devuelve un valor constante de la tasa de cambio para cualquier par de monedas
+        sin realizar ninguna llamada a la API externa. Funciona como un mock.
         """
-        params = {
-            'access_key': self.api_key,
-            'source': source,
-            'currencies': target
-        }
-        url = f"{self.api_url}/live?" + urllib.parse.urlencode(params)
-        with urllib.request.urlopen(url) as response:
-            data = json.loads(response.read().decode())
-        if not data.get('success'):
-            raise Exception(f"API error: {data}")
-        quotes = data['quotes']
-        key = source + target
-        if key not in quotes:
-            raise Exception(f"Rate not found for {source}->{target}")
-        return str(quotes[key]), data['timestamp']  # guardamos como string
+        time.sleep(0.5)  # Simulamos un retraso de 500 ms, como en una llamada real
+
+        # Tasa fija simulada (puede ser cualquier valor constante)
+        fixed_rate = '3.75'  # Tasa fija de cambio para todos los pares de monedas
+        fixed_timestamp = 1640995200  # Timestamp de ejemplo (2022-01-01)
+
+        # Simulamos que devolvemos el valor como si lo hubiéramos obtenido de la API externa
+        return fixed_rate, fixed_timestamp
+
 
     def fetch_rates_for_source(self, source):
         """
-        Obtiene todas las tasas de cambio desde 'source' usando la API externa.
-        Retorna un diccionario con las tasas y el timestamp de la consulta.
+        Devuelve todas las tasas de cambio fijas para un `source` sin llamar a la API externa.
+        Funcionando como un mock.
         """
-        params = {
-            'access_key': self.api_key,
-            'source': source
+        time.sleep(0.5)  # Simulamos un retraso de 500 ms, como en una llamada real
+
+        # Tasas fijas simuladas para cualquier par de divisas desde `source`
+        fixed_rates = {
+            'USDUSD': '1.00',  # Valor ficticio para el par USD/USD
+            'USDEUR': '0.84',  # Valor ficticio para el par USD/EUR
+            'USDJPY': '110.45', # Valor ficticio para el par USD/JPY
+            'USDPEN': '3.75',  # Valor ficticio para el par USD/PEN (simulando una tasa fija)
         }
-        url = f"{self.api_url}/live?" + urllib.parse.urlencode(params)
-        with urllib.request.urlopen(url) as response:
-            data = json.loads(response.read().decode())
-        if not data.get('success'):
-            raise Exception(f"API error: {data}")
-        if 'quotes' not in data:
-            raise Exception("No exchange rates found in the API response.")
-        return data['quotes'], data['timestamp']
+        fixed_timestamp = 1640995200  # Timestamp de ejemplo (2022-01-01)
+
+        # Simulamos que devolvemos las tasas como si las hubiéramos obtenido de la API externa
+        return fixed_rates, fixed_timestamp
 
 
 # Singleton para la conexión a DynamoDB
