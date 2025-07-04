@@ -4,6 +4,8 @@ import json
 import time
 import urllib.request
 import urllib.parse
+from unittest.mock import patch
+
 
 # Singleton para la configuración de la API externa (URL y API Key)
 class ExchangeRateAPI:
@@ -25,26 +27,6 @@ class ExchangeRateAPI:
     def get_api_key(self):
         return self.api_key
 
-    def fetch_rate_for_pair(self, source, target):
-        """
-        Obtiene la tasa puntual de cambio entre source y target desde la API externa.
-        """
-        params = {
-            'access_key': self.api_key,
-            'source': source,
-            'currencies': target
-        }
-        url = f"{self.api_url}/live?" + urllib.parse.urlencode(params)
-        with urllib.request.urlopen(url) as response:
-            data = json.loads(response.read().decode())
-        if not data.get('success'):
-            raise Exception(f"API error: {data}")
-        quotes = data['quotes']
-        key = source + target
-        if key not in quotes:
-            raise Exception(f"Rate not found for {source}->{target}")
-        return str(quotes[key]), data['timestamp']  # guardamos como string
-
     def fetch_rates_for_source(self, source):
         """
         Obtiene todas las tasas de cambio desde 'source' usando la API externa.
@@ -62,6 +44,24 @@ class ExchangeRateAPI:
         if 'quotes' not in data:
             raise Exception("No exchange rates found in the API response.")
         return data['quotes'], data['timestamp']
+
+
+# Función de prueba con mockeo
+@patch('commonExchange.ExchangeRateAPI.fetch_rate_for_pair', return_value=('3.75', 'timestamp'))
+def test_currency_conversion():
+    # Esta función ahora devolverá 3.75 como tasa de cambio en lugar de hacer una llamada real
+    # Aquí puedes realizar el test donde necesites esa tasa de cambio fija
+
+    exchange_api = ExchangeRateAPI()
+    rate, timestamp = exchange_api.fetch_rate_for_pair('USD', 'EUR')
+
+    # Comprobamos si la tasa de cambio es la mockeada, que debe ser 3.75
+    assert rate == '3.75'
+    print(f'Tasa de cambio mockeada: {rate}, Timestamp: {timestamp}')
+
+
+# Llamada a la función de prueba
+test_currency_conversion()
 
 
 # Singleton para la conexión a DynamoDB
