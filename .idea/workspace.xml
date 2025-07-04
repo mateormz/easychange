@@ -4,12 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="44809d59-ca6a-4b6e-81af-b08bf8f5e825" name="Changes" comment="Hoy54">
-      <change beforePath="$PROJECT_DIR$/.idea/easychange.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/easychange.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+    <list default="true" id="44809d59-ca6a-4b6e-81af-b08bf8f5e825" name="Changes" comment="mock_exchange">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/Exchange/commonExchange.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/Exchange/commonExchange.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/Exchange/serverless.yml" beforeDir="false" afterPath="$PROJECT_DIR$/backend/Exchange/serverless.yml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -99,39 +95,7 @@
       <workItem from="1749267045673" duration="17389000" />
       <workItem from="1749309468270" duration="1897000" />
       <workItem from="1751508064077" duration="5353000" />
-      <workItem from="1751589109432" duration="4727000" />
-    </task>
-    <task id="LOCAL-00031" summary="Hoy53">
-      <option name="closed" value="true" />
-      <created>1749140421490</created>
-      <option name="number" value="00031" />
-      <option name="presentableId" value="LOCAL-00031" />
-      <option name="project" value="LOCAL" />
-      <updated>1749140421490</updated>
-    </task>
-    <task id="LOCAL-00032" summary="Hoy53">
-      <option name="closed" value="true" />
-      <created>1749140901804</created>
-      <option name="number" value="00032" />
-      <option name="presentableId" value="LOCAL-00032" />
-      <option name="project" value="LOCAL" />
-      <updated>1749140901804</updated>
-    </task>
-    <task id="LOCAL-00033" summary="Hoy53">
-      <option name="closed" value="true" />
-      <created>1749141726008</created>
-      <option name="number" value="00033" />
-      <option name="presentableId" value="LOCAL-00033" />
-      <option name="project" value="LOCAL" />
-      <updated>1749141726008</updated>
-    </task>
-    <task id="LOCAL-00034" summary="Hoy53">
-      <option name="closed" value="true" />
-      <created>1749142052396</created>
-      <option name="number" value="00034" />
-      <option name="presentableId" value="LOCAL-00034" />
-      <option name="project" value="LOCAL" />
-      <updated>1749142052396</updated>
+      <workItem from="1751589109432" duration="8025000" />
     </task>
     <task id="LOCAL-00035" summary="Hoy53">
       <option name="closed" value="true" />
@@ -493,7 +457,39 @@
       <option name="project" value="LOCAL" />
       <updated>1751592146517</updated>
     </task>
-    <option name="localTasksCounter" value="80" />
+    <task id="LOCAL-00080" summary="mock_exchange">
+      <option name="closed" value="true" />
+      <created>1751593932925</created>
+      <option name="number" value="00080" />
+      <option name="presentableId" value="LOCAL-00080" />
+      <option name="project" value="LOCAL" />
+      <updated>1751593932925</updated>
+    </task>
+    <task id="LOCAL-00081" summary="mock_exchange">
+      <option name="closed" value="true" />
+      <created>1751594555260</created>
+      <option name="number" value="00081" />
+      <option name="presentableId" value="LOCAL-00081" />
+      <option name="project" value="LOCAL" />
+      <updated>1751594555260</updated>
+    </task>
+    <task id="LOCAL-00082" summary="mock_exchange">
+      <option name="closed" value="true" />
+      <created>1751595231939</created>
+      <option name="number" value="00082" />
+      <option name="presentableId" value="LOCAL-00082" />
+      <option name="project" value="LOCAL" />
+      <updated>1751595231939</updated>
+    </task>
+    <task id="LOCAL-00083" summary="mock_exchange">
+      <option name="closed" value="true" />
+      <created>1751596147784</created>
+      <option name="number" value="00083" />
+      <option name="presentableId" value="LOCAL-00083" />
+      <option name="project" value="LOCAL" />
+      <updated>1751596147784</updated>
+    </task>
+    <option name="localTasksCounter" value="84" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -525,6 +521,7 @@
     <MESSAGE value="Hoy51" />
     <MESSAGE value="Hoy53" />
     <MESSAGE value="Hoy54" />
-    <option name="LAST_COMMIT_MESSAGE" value="Hoy54" />
+    <MESSAGE value="mock_exchange" />
+    <option name="LAST_COMMIT_MESSAGE" value="mock_exchange" />
   </component>
 </project>
