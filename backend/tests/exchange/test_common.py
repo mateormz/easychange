@@ -18,7 +18,8 @@ def setup_environment():
         "EXCHANGE_API_ACCESS_KEY": "test_key",
         "SERVICE_NAME": "test-service",
         "STAGE": "dev",
-        "VALIDATE_TOKEN_FUNCTION": "validateToken"
+        "VALIDATE_TOKEN_FUNCTION": "validateToken",
+        "AWS_DEFAULT_REGION": "us-east-1"  # Agregar región de AWS
     }
     
     with patch.dict(os.environ, env_vars):
