@@ -31,6 +31,8 @@ class ExchangeRateAPI:
         Obtiene la tasa puntual de cambio entre source y target.
         Esta versión ahora devuelve un valor fijo en lugar de hacer la llamada a la API externa.
         """
+        time.sleep(0.5)
+
         # Valor fijo de la tasa de cambio, sin necesidad de hacer la llamada real a la API
         fixed_rate = '3.75'  # Tasa de cambio fija para pruebas o uso sin conexión real
         fixed_timestamp = 1640995200  # Timestamp de ejemplo (2022-01-01)
@@ -44,10 +46,12 @@ class ExchangeRateAPI:
         Obtiene todas las tasas de cambio desde 'source'.
         Esta versión ahora devuelve tasas fijas en lugar de hacer la llamada a la API externa.
         """
+        time.sleep(0.5)
+
         # Simulando tasas fijas para un solo `source` sin llamar a la API externa
         fixed_rates = {
             'USDUSD': '1.00',  # Valor ficticio para el par USD/USD
-            'USDEUR': '0.85',  # Valor ficticio para el par USD/EUR
+            'USDEUR': '0.84',  # Valor ficticio para el par USD/EUR
         }
         fixed_timestamp = 1640995200  # Timestamp de ejemplo (2022-01-01)
 
